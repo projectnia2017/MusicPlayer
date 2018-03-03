@@ -11,6 +11,8 @@ import AVFoundation
 import MediaPlayer
 
 class MusicController {
+    //シングルトン
+    static var shared: MusicController = MusicController()
     
     //MARK: 定義
     //定数
@@ -72,12 +74,8 @@ class MusicController {
     var remainCount = 0
     
     //MARK: 初期化
-    //シングルトン
-    static var shared: MusicController = MusicController()
-    
     //初期化
     private init(){
-        
     }
     
     //MARK: 状態取得
@@ -135,7 +133,6 @@ class MusicController {
         
         //ソート処理
         
-        
         //クエリー取得
         let playlistCollections = playlistQuery.collections
         
@@ -161,14 +158,15 @@ class MusicController {
     func setPlaylist(playListId: Int, songId: Int, sortType:SortType = MusicController.SortType.DEFAULT){
         let playlistQuery = MPMediaQuery.playlists()
         playlistQuery.addFilterPredicate(MPMediaPropertyPredicate(value: false, forProperty: MPMediaItemPropertyIsCloudItem))
-        //ソート処理
-        
         
         //クエリー取得
         let playlistCollections = playlistQuery.collections
-        
         let playlist = playlistCollections![playListId]
         
+        //ソート処理
+        
+        
+        //キューのセット
         player.setQueue(with: playlist)
         player.nowPlayingItem = playlist.items[songId]
         player.prepareToPlay()
