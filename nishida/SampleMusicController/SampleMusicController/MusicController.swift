@@ -12,28 +12,31 @@ import MediaPlayer
 
 class MusicController {
     
-    
-    
     //MARK: 定義
     //定数
-    enum playerStatus: String {
-        case play = "PLAY"
-        case pause = "PAUSE"
-        case stop = "STOP"
+    public enum PlayerStatus {
+        case PLAY
+        case PAUSE
+        case STOP
     }
-    
-    enum playerMode: String {
-        case normalMode = "NORMAL"
-        case repeatMode = "REPEAT"
-        case CountMode = "COUNT"
-        case shuffleMode = "SHUFFLE"
+    public enum PlayerMode {
+        case NORMAL
+        case REPEAT
+        case COUNT
+        case SHUFFLE
     }
-    
-    enum playingCategory: String {
-        case song = "SONG"
-        case playlist = "PLAYLIST"
-        case album = "ALBUM"
-        case artist = "ARTIST"
+    public enum PlayingCategory {
+        case SONG
+        case PLAYLIST
+        case ALBUM
+        case ARTIST
+    }
+    public enum SortType {
+        case DEFAULT
+        case TITLE
+        case ARTIST
+        case ALBUM
+        case TRACKNUMBER
     }
     
     //構造体
@@ -60,9 +63,9 @@ class MusicController {
     let player = MPMusicPlayerController.systemMusicPlayer
     
     //状態
-    var status = ""
-    var mode = ""
-    var category = ""
+    var status: PlayerStatus = MusicController.PlayerStatus.STOP
+    var mode:PlayerMode = MusicController.PlayerMode.NORMAL
+    var category:PlayingCategory = MusicController.PlayingCategory.PLAYLIST
     
     //カウント付きリピート
     var repeatCount = 0
@@ -123,12 +126,17 @@ class MusicController {
     }
     
     //曲一覧
-    func getSongsWithPlaylists(id: Int) -> Array<MusicController.SongItem>{
+    func getSongsWithPlaylists(id: Int, sortType:SortType = MusicController.SortType.DEFAULT) -> Array<MusicController.SongItem>{
         
         var songs:Array<MusicController.SongItem> = []
         
         let playlistQuery = MPMediaQuery.playlists()
         playlistQuery.addFilterPredicate(MPMediaPropertyPredicate(value: false, forProperty: MPMediaItemPropertyIsCloudItem))
+        
+        //ソート処理
+        
+        
+        //クエリー取得
         let playlistCollections = playlistQuery.collections
         
         let playlist = playlistCollections![id]
@@ -150,9 +158,13 @@ class MusicController {
     
     //MARK: 曲のセット
     //プレイリスト
-    func setPlaylist(playListId: Int, songId: Int){
+    func setPlaylist(playListId: Int, songId: Int, sortType:SortType = MusicController.SortType.DEFAULT){
         let playlistQuery = MPMediaQuery.playlists()
         playlistQuery.addFilterPredicate(MPMediaPropertyPredicate(value: false, forProperty: MPMediaItemPropertyIsCloudItem))
+        //ソート処理
+        
+        
+        //クエリー取得
         let playlistCollections = playlistQuery.collections
         
         let playlist = playlistCollections![playListId]
@@ -172,17 +184,17 @@ class MusicController {
     //MARK: プレイヤー制御
     func play() {
         player.play()
-        status = MusicController.playerStatus.play.rawValue
+        status = MusicController.PlayerStatus.PLAY
     }
     
     func pause() {
         player.pause()
-        status = MusicController.playerStatus.pause.rawValue
+        status = MusicController.PlayerStatus.PAUSE
     }
     
     func stop() {
         player.stop()
-        status = MusicController.playerStatus.stop.rawValue
+        status = MusicController.PlayerStatus.STOP
     }
     
     func next() {
