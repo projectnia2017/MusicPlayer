@@ -33,7 +33,7 @@ class ViewController: UIViewController {
         notificationCenter.addObserver(self, selector: #selector(ViewController.nowPlayingItemChanged(_:)), name: MPMusicPlayerControllerNowPlayingItemDidChangeNotification, object: musicPlayer)
         */
         
-        musicController.player.beginGeneratingPlaybackNotifications()
+        //musicController.player.beginGeneratingPlaybackNotifications()
         
     }
     
@@ -43,51 +43,53 @@ class ViewController: UIViewController {
     }
     
     func loadPlaylist(){
-        let playlists:Array<MusicController.PlaylistItem> = musicController.getPlaylists()
         
+        let playlists:Array<MusicController.PlaylistItem> = musicController.getPlaylists(sortOrder: MusicController.SortOrder.ASCENDING)
         for playlist:MusicController.PlaylistItem in playlists{
             //print("\(playlist.id):\(playlist.title)")
         }
         
-        let songs:Array<MusicController.SongItem> = musicController.getSongsWithPlaylists(id: 4)
-        
+        let songs:Array<MusicController.SongItem> = musicController.getSongsWithPlaylist(id: 0, sortType: MusicController.SortType.TITLE, sortOrder: MusicController.SortOrder.ASCENDING)
+        //let songs:Array<MusicController.SongItem> = musicController.getSongsWithPlaylist(id: 0, sortType: MusicController.SortType.ALBUM, sortOrder: MusicController.SortOrder.DESCENDING)
         for song:MusicController.SongItem in songs{
             print("\(song.id):\(song.title):\(song.artist):\(song.albumTitle)")
         }
         
-        musicController.setPlaylist(playListId: 4, songId: 3)
+        musicController.setPlayer(list: songs, playId: 5)
+        
+        
     }
 
     @IBAction func playMusic(_ sender: Any) {
         musicController.play()
-        
         print("\(musicController.status)")
     }
     
     @IBAction func pauseMusic(_ sender: Any) {
         musicController.pause()
-        
         print("\(musicController.status)")
     }
     
     @IBAction func prevMusic(_ sender: Any) {
         musicController.prev()
-        
-        print("\(musicController.status)")
     }
     
     @IBAction func nextMusic(_ sender: Any) {
         musicController.next()
-        
-        print("\(musicController.status)")
+    }
+    
+    @IBAction func stopMusic(_ sender: Any) {
+        //再生を止め、リストをクリア
+        musicController.stop()
     }
     
     func nowPlayingItemChanged(notification: NSNotification) {
         
+        /*
         if let mediaItem = musicController.player.nowPlayingItem {
             
         }
-        
+        */
     }
 }
 

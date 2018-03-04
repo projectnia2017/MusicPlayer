@@ -52,7 +52,7 @@
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <state key="normal" title="Stop"/>
                                 <connections>
-                                    <action selector="stopMusic:" destination="BYZ-38-t0r" eventType="touchUpInside" id="Z33-my-d7z"/>
+                                    <action selector="stopMusic:" destination="BYZ-38-t0r" eventType="touchUpInside" id="Xes-t6-fuS"/>
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="F7g-3i-Apw">
