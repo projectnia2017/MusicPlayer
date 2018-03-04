@@ -28,10 +28,8 @@ class ViewController: UIViewController {
         }
         
         //通知の有効化
-        let notificationCenter = NotificationCenter.default
-        /*
-        notificationCenter.addObserver(self, selector: #selector(ViewController.nowPlayingItemChanged(_:)), name: MPMusicPlayerControllerNowPlayingItemDidChangeNotification, object: musicPlayer)
-        */
+//        let notificationCenter = NotificationCenter.default
+//        notificationCenter.addObserver(self, selector: #selector(ViewController.nowPlayingItemChanged(_:)), name: MPMusicPlayerControllerNowPlayingItemDidChangeNotification, object: musicPlayer)
         
         //musicController.player.beginGeneratingPlaybackNotifications()
         
@@ -44,30 +42,28 @@ class ViewController: UIViewController {
     
     func loadPlaylist(){
         
-        let playlists:Array<MusicController.PlaylistItem> = musicController.getPlaylists(sortOrder: MusicController.SortOrder.ASCENDING)
-        for playlist:MusicController.PlaylistItem in playlists{
-            //print("\(playlist.id):\(playlist.title)")
-        }
+//        let playlists:Array<MusicController.PlaylistItem> = musicController.getPlaylists(sortOrder: MusicController.SortOrder.ASCENDING)
+//        for playlist:MusicController.PlaylistItem in playlists{
+//            print("\(playlist.id):\(playlist.title)")
+//        }
         
         let songs:Array<MusicController.SongItem> = musicController.getSongsWithPlaylist(id: 0, sortType: MusicController.SortType.TITLE, sortOrder: MusicController.SortOrder.ASCENDING)
-        //let songs:Array<MusicController.SongItem> = musicController.getSongsWithPlaylist(id: 0, sortType: MusicController.SortType.ALBUM, sortOrder: MusicController.SortOrder.DESCENDING)
+//        let songs:Array<MusicController.SongItem> = musicController.getSongsWithPlaylist(id: 0, sortType: MusicController.SortType.ALBUM, sortOrder: MusicController.SortOrder.DESCENDING)
         for song:MusicController.SongItem in songs{
             print("\(song.id):\(song.title):\(song.artist):\(song.albumTitle)")
         }
         
         musicController.setPlayer(list: songs, playId: 5)
-        
-        
     }
 
     @IBAction func playMusic(_ sender: Any) {
         musicController.play()
-        print("\(musicController.status)")
+        print("\(musicController.currentStatus)")
     }
     
     @IBAction func pauseMusic(_ sender: Any) {
         musicController.pause()
-        print("\(musicController.status)")
+        print("\(musicController.currentStatus)")
     }
     
     @IBAction func prevMusic(_ sender: Any) {

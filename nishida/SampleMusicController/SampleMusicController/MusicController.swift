@@ -27,18 +27,23 @@ class MusicController: NSObject, AVAudioPlayerDelegate  {
         case COUNT
         case UNLIMITED
     }
-    public enum PlayingCategory {
-        case SONG
+    public enum PlayerType {
         case PLAYLIST
         case ALBUM
         case ARTIST
+        case SONG
+        case HISTORY
     }
     public enum SortType {
         case DEFAULT
+        case SHUFFLE
         case TITLE
         case ARTIST
         case ALBUM
         case TRACKNUMBER
+        case PLAYCOUNT
+        case DATEADDED
+        case DATEPLAYED
     }
     public enum SortOrder {
         case ASCENDING
@@ -66,22 +71,31 @@ class MusicController: NSObject, AVAudioPlayerDelegate  {
         var mediaItem: MPMediaItem?
     }
     
+    //ソート順
+    var sortTypeListPlaylist:Array<SortType> = [SortType.DEFAULT, SortType.SHUFFLE,SortType.TITLE, SortType.ARTIST, SortType.ALBUM]
+    var sortTypeListAlbum:Array<SortType> = [SortType.DEFAULT, SortType.SHUFFLE, SortType.TITLE, SortType.TRACKNUMBER]
+    var sortTypeListArtist:Array<SortType> = [SortType.DEFAULT, SortType.SHUFFLE, SortType.TITLE, SortType.ALBUM]
+    var sortTypeListSong:Array<SortType> = [SortType.TITLE, SortType.SHUFFLE,SortType.ARTIST, SortType.ALBUM]
+    var sortTypeListHistory:Array<SortType> = [SortType.DATEPLAYED]
+    
     //MARK: publicプロパティ
     //プレイヤー
     //let player = MPMusicPlayerController.applicationMusicPlayer
     var player: AVAudioPlayer!
     var playingList: Array<MusicController.SongItem>!
     var playingNumber: Int
-    var nowPlayingMediaItem: MPMediaItem!
+    var playingMediaItem: MPMediaItem!
     
     //状態
-    var status: PlayerStatus = MusicController.PlayerStatus.STOP
-    var mode:PlayerMode = MusicController.PlayerMode.NORMAL
-    var category:PlayingCategory = MusicController.PlayingCategory.PLAYLIST
+    var currentStatus: PlayerStatus = PlayerStatus.STOP
+    var currentMode:PlayerMode = PlayerMode.NORMAL
+    var currentType:PlayerType = PlayerType.PLAYLIST
+    var currentSortType:SortType = SortType.DEFAULT
+    var currentSortOrder:SortOrder = SortOrder.ASCENDING
     
     //カウント付きリピート
     var repeatCount = 0
-    var remainCount = 0
+    private var remainCount = 0
     
     //MARK: privateプロパティ
     private let audioSession: AVAudioSession
@@ -97,7 +111,7 @@ class MusicController: NSObject, AVAudioPlayerDelegate  {
         self.player = nil
         self.playingList = nil
         self.playingNumber = 0
-        self.nowPlayingMediaItem = nil
+        self.playingMediaItem = nil
         
         self.audioSession = AVAudioSession.sharedInstance()
         self.commandCenter = MPRemoteCommandCenter.shared()
@@ -121,7 +135,7 @@ class MusicController: NSObject, AVAudioPlayerDelegate  {
         return false
     }
     func isPlaying() -> Bool {
-        if self.status == PlayerStatus.PLAY {
+        if self.currentStatus == PlayerStatus.PLAY {
             return true
         }
         return false
@@ -196,9 +210,40 @@ class MusicController: NSObject, AVAudioPlayerDelegate  {
         return sortedList
     }
     //アルバム情報
-    func getAlbums(sortType:SortType = SortType.DEFAULT, sortOrder:SortOrder = SortOrder.ASCENDING) -> Array<MusicController.SongItem>{
-        let sortedAlbum:Array<MusicController.SongItem> = []
-        return sortedAlbum
+    func getAlbums(sortType:SortType = SortType.DEFAULT, sortOrder:SortOrder = SortOrder.ASCENDING) -> Array<MusicController.AlbumItem>{
+        
+        //クエリー取得
+        let albumQuery = MPMediaQuery.albums()
+        albumQuery.addFilterPredicate(MPMediaPropertyPredicate(value: false, forProperty: MPMediaItemPropertyIsCloudItem))
+        let albumCollections = albumQuery.collections
+        
+        //アルバムデータ作成
+        var albums:Array<MusicController.AlbumItem> = []
+//
+//        var albumsId: Int = 0;
+//        for albums in albumCollections! {
+//            let playlistName = playlist.value(forKey: MPMediaPropertyAName) ?? ""
+//            var item = PlaylistItem(id: playlistId, title: playlistName as! String, artwork: nil)
+//
+//            for mediaItem in playlist.items {
+//                if mediaItem.artwork != nil {
+//                    item.artwork = mediaItem.artwork
+//                    break;
+//                }
+//            }
+//
+//            playlists.append(item)
+//            playlistId += 1
+//        }
+        
+        //ソート
+        if sortOrder == SortOrder.ASCENDING {
+            albums.sort(by: {$0.id < $1.id})
+        }else{
+            albums.sort(by: {$0.id > $1.id})
+        }
+        
+        return albums
     }
     //アルバム内の曲リスト
     func getSongsWithAlbum(id: Int,
@@ -248,28 +293,30 @@ class MusicController: NSObject, AVAudioPlayerDelegate  {
         
         //ソート処理
         switch sortType {
-        case SortType.DEFAULT:
+        case .DEFAULT:
             if sortOrder == SortOrder.ASCENDING {
                 sortedList = songList.sorted(by: {$0.id < $1.id})
             }else{
                 sortedList = songList.sorted(by: {$0.id > $1.id})
             }
             break
-        case SortType.TITLE:
+        case .SHUFFLE:
+            break
+        case .TITLE:
             if sortOrder == SortOrder.ASCENDING {
                 sortedList = songList.sorted(by: {$0.title < $1.title})
             }else{
                 sortedList = songList.sorted(by: {$0.title > $1.title})
             }
             break
-        case SortType.ARTIST:
+        case .ARTIST:
             if sortOrder == SortOrder.ASCENDING {
                 sortedList = songList.sorted(by: {$0.artist < $1.artist})
             }else{
                 sortedList = songList.sorted(by: {$0.artist > $1.artist})
             }
             break
-        case SortType.ALBUM:
+        case .ALBUM:
             if sortOrder == SortOrder.ASCENDING {
                 //sortedList = songList.sorted(by: {$0.albumTitle < $1.albumTitle})
                 sortedList = songList.sorted { (a:SongItem, b:SongItem) -> Bool in
@@ -290,13 +337,19 @@ class MusicController: NSObject, AVAudioPlayerDelegate  {
                 }
             }
             break
-        case SortType.TRACKNUMBER:
+        case .TRACKNUMBER:
             if sortOrder == SortOrder.ASCENDING {
                 sortedList = songList.sorted(by: {$0.trackNumber < $1.trackNumber})
                 
             }else{
                 sortedList = songList.sorted(by: {$0.trackNumber > $1.trackNumber})
             }
+            break
+        case .PLAYCOUNT:
+            break
+        case .DATEADDED:
+            break
+        case .DATEPLAYED:
             break
         }
         
@@ -334,7 +387,7 @@ class MusicController: NSObject, AVAudioPlayerDelegate  {
             self.player = try AVAudioPlayer(contentsOf: url as URL)
             self.player.delegate = self
             self.player.prepareToPlay()
-            self.nowPlayingMediaItem = mediaItem
+            self.playingMediaItem = mediaItem
         } catch {
             self.player = nil
         }
@@ -346,7 +399,7 @@ class MusicController: NSObject, AVAudioPlayerDelegate  {
     //MARK: プレイヤー制御
     func play() {
         if self.player != nil{
-            self.status = PlayerStatus.PLAY
+            self.currentStatus = PlayerStatus.PLAY
             self.player.play()
             
             updateCommandCenter()
@@ -355,7 +408,7 @@ class MusicController: NSObject, AVAudioPlayerDelegate  {
     }
     func pause() {
         if self.player != nil{
-            self.status = PlayerStatus.PAUSE
+            self.currentStatus = PlayerStatus.PAUSE
             self.player.pause()
             
             updateCommandCenter()
@@ -370,7 +423,7 @@ class MusicController: NSObject, AVAudioPlayerDelegate  {
                 let mediaItem: MPMediaItem = song.mediaItem!
                 setMediaItem(mediaItem: mediaItem)
             }else{
-                if self.mode == PlayerMode.UNLIMITED {
+                if self.currentMode == PlayerMode.UNLIMITED {
                     self.playingNumber = 0
                     let song: SongItem = playingList[playingNumber]
                     let mediaItem: MPMediaItem = song.mediaItem!
@@ -378,7 +431,7 @@ class MusicController: NSObject, AVAudioPlayerDelegate  {
                 }
             }
             
-            if self.status == PlayerStatus.PLAY {
+            if self.currentStatus == PlayerStatus.PLAY {
                 self.player.play()
             }
             
@@ -394,7 +447,7 @@ class MusicController: NSObject, AVAudioPlayerDelegate  {
                 let mediaItem: MPMediaItem = song.mediaItem!
                 setMediaItem(mediaItem: mediaItem)
             }else{
-                if self.mode == PlayerMode.UNLIMITED {
+                if self.currentMode == PlayerMode.UNLIMITED {
                     self.playingNumber = playingList.count-1
                     let song: SongItem = playingList[playingNumber]
                     let mediaItem: MPMediaItem = song.mediaItem!
@@ -402,7 +455,7 @@ class MusicController: NSObject, AVAudioPlayerDelegate  {
                 }
             }
             
-            if self.status == PlayerStatus.PLAY {
+            if self.currentStatus == PlayerStatus.PLAY {
                 self.player.play()
             }
             
@@ -412,14 +465,14 @@ class MusicController: NSObject, AVAudioPlayerDelegate  {
     }
     func stop() {
         if self.player != nil{
-            self.status = PlayerStatus.STOP
+            self.currentStatus = PlayerStatus.STOP
             self.player.stop()
             
             self.player.delegate = nil
             self.player = nil
             
             self.playingList = nil
-            self.nowPlayingMediaItem = nil
+            self.playingMediaItem = nil
             
             updateCommandCenter()
             updateNowPlayingInfoCenter()
@@ -427,15 +480,17 @@ class MusicController: NSObject, AVAudioPlayerDelegate  {
     }
     
     //モード変更
-    func setShuffle(){
+    func setModeNormal(){
     }
-    func setRepeat(){
+    func setModeRepeat(){
     }
-    func setCount(count: Int){
+    func setModeCount(count: Int){
+    }
+    func setModeUnlimited(){
     }
     
     //MARK: MPRemoteCommandCenter制御
-    func configureCommandCenter() {
+    private func configureCommandCenter() {
         self.commandCenter.playCommand.addTarget (handler: { [weak self] event -> MPRemoteCommandHandlerStatus in
             guard let sself = self else { return .commandFailed }
             sself.play()
@@ -458,7 +513,7 @@ class MusicController: NSObject, AVAudioPlayerDelegate  {
         })
     }
     
-    func updateCommandCenter() {
+    private func updateCommandCenter() {
         
         if playingList != nil {
             self.commandCenter.playCommand.isEnabled = true
@@ -467,7 +522,7 @@ class MusicController: NSObject, AVAudioPlayerDelegate  {
             if playingNumber > 0 {
                 self.commandCenter.previousTrackCommand.isEnabled = true
             }else{
-                if self.mode == PlayerMode.UNLIMITED {
+                if self.currentMode == PlayerMode.UNLIMITED {
                     self.commandCenter.previousTrackCommand.isEnabled = true
                 }else{
                     self.commandCenter.previousTrackCommand.isEnabled = false
@@ -477,7 +532,7 @@ class MusicController: NSObject, AVAudioPlayerDelegate  {
             if playingNumber < playingList.count-1 {
                 self.commandCenter.nextTrackCommand.isEnabled = true
             }else{
-                if self.mode == PlayerMode.UNLIMITED {
+                if self.currentMode == PlayerMode.UNLIMITED {
                     self.commandCenter.nextTrackCommand.isEnabled = true
                 }else{
                     self.commandCenter.nextTrackCommand.isEnabled = false
@@ -494,16 +549,16 @@ class MusicController: NSObject, AVAudioPlayerDelegate  {
     
     //MARK: MPNowPlayingInfoCenter制御
     private func updateNowPlayingInfoCenter(){
-        if nowPlayingMediaItem != nil {
+        if playingMediaItem != nil {
             self.nowPlayingInfoCenter.nowPlayingInfo = [
-                MPMediaItemPropertyTitle: nowPlayingMediaItem.title ?? "",
-                MPMediaItemPropertyAlbumTitle: nowPlayingMediaItem.albumTitle ?? "",
-                MPMediaItemPropertyArtist: nowPlayingMediaItem.artist ?? "",
+                MPMediaItemPropertyTitle: playingMediaItem.title ?? "",
+                MPMediaItemPropertyAlbumTitle: playingMediaItem.albumTitle ?? "",
+                MPMediaItemPropertyArtist: playingMediaItem.artist ?? "",
                 MPMediaItemPropertyPlaybackDuration: player.duration,
                 MPNowPlayingInfoPropertyPlaybackRate: NSNumber(value: 1.0 as Float)] as [String : Any]
             
-            if nowPlayingMediaItem.artwork != nil {
-                self.nowPlayingInfoCenter.nowPlayingInfo![MPMediaItemPropertyArtwork] = nowPlayingMediaItem.artwork
+            if playingMediaItem.artwork != nil {
+                self.nowPlayingInfoCenter.nowPlayingInfo![MPMediaItemPropertyArtwork] = playingMediaItem.artwork
             }
         } else{
             self.nowPlayingInfoCenter.nowPlayingInfo = nil
@@ -522,7 +577,7 @@ class MusicController: NSObject, AVAudioPlayerDelegate  {
          */
     }
     
-    func endPlayback() {
+    open func endPlayback() {
         /*
         self.currentPlaybackItem = nil
         self.audioPlayer = nil
