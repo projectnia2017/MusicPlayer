@@ -251,6 +251,17 @@ class MusicController: NSObject, AVAudioPlayerDelegate  {
             sself.prev()
             return .success
         })
+        
+        self.commandCenter.changePlaybackPositionCommand.addTarget (handler: { [weak self] event -> MPRemoteCommandHandlerStatus in
+            guard let sself = self else { return .commandFailed }
+            let e:MPChangePlaybackPositionCommandEvent = event as! MPChangePlaybackPositionCommandEvent
+            sself.player.currentTime = e.positionTime
+            return .success
+        })
+    }
+    
+    private func handleChangePlaybackPositionCommandEvent(event: MPChangePlaybackPositionCommandEvent) {
+        player.currentTime = event.positionTime
     }
     
     private func updateCommandCenter() {
@@ -258,6 +269,7 @@ class MusicController: NSObject, AVAudioPlayerDelegate  {
         if playingList != nil {
             self.commandCenter.playCommand.isEnabled = true
             self.commandCenter.pauseCommand.isEnabled = true
+            self.commandCenter.changePlaybackPositionCommand.isEnabled = true
             
             if playingNumber > 0 {
                 self.commandCenter.previousTrackCommand.isEnabled = true
@@ -279,6 +291,7 @@ class MusicController: NSObject, AVAudioPlayerDelegate  {
                     
                 }
             }
+            
         } else{
             self.commandCenter.playCommand.isEnabled = false
             self.commandCenter.pauseCommand.isEnabled = false
