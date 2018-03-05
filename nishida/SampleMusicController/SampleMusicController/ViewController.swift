@@ -12,6 +12,7 @@ import MediaPlayer
 
 class ViewController: UIViewController {
 
+    let musicDataController = MusicDataController.shared
     let musicController = MusicController.shared
     
     override func viewDidLoad() {
@@ -42,14 +43,14 @@ class ViewController: UIViewController {
     
     func loadPlaylist(){
         
-//        let playlists:Array<MusicController.PlaylistItem> = musicController.getPlaylists(sortOrder: MusicController.SortOrder.ASCENDING)
-//        for playlist:MusicController.PlaylistItem in playlists{
-//            print("\(playlist.id):\(playlist.title)")
-//        }
+        let playlists:Array<MusicData.PlaylistItem> = musicDataController.getPlaylists(sortOrder: MusicDataController.SortOrder.ASCENDING)
+        for playlist:MusicData.PlaylistItem in playlists{
+            print("\(playlist.id):\(playlist.title)")
+        }
         
-        let songs:Array<MusicController.SongItem> = musicController.getSongsWithPlaylist(id: 0, sortType: MusicController.SortType.TITLE, sortOrder: MusicController.SortOrder.ASCENDING)
-//        let songs:Array<MusicController.SongItem> = musicController.getSongsWithPlaylist(id: 0, sortType: MusicController.SortType.ALBUM, sortOrder: MusicController.SortOrder.DESCENDING)
-        for song:MusicController.SongItem in songs{
+        let songs:Array<MusicData.SongItem> = musicDataController.getSongsWithPlaylist(id: 0, sortType: MusicDataController.SortType.TITLE, sortOrder: MusicDataController.SortOrder.ASCENDING)
+        //let songs:Array<MusicData.SongItem> = musicDataController.getSongsWithPlaylist(id: 0, sortType: MusicDataController.SortType.ALBUM, sortOrder: MusicDataController.SortOrder.DESCENDING)
+        for song:MusicData.SongItem in songs{
             print("\(song.id):\(song.title):\(song.artist):\(song.albumTitle)")
         }
         
