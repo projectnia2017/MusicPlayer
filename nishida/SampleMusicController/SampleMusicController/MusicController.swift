@@ -4,6 +4,8 @@
 //  Created by yoshihiko on 2018/03/03.
 //  Copyright © 2018年 yoshihiko. All rights reserved.
 //
+//  AVAudioPlayerでの音楽再生制御
+//
 
 import Foundation
 import AVFoundation
@@ -13,7 +15,7 @@ class MusicController: NSObject, AVAudioPlayerDelegate  {
     //シングルトン
     static var shared: MusicController = MusicController()
     
-    //MARK: 定義
+    //MARK: - 定義
     //定数
     public enum PlayerStatus {
         case PLAY
@@ -34,11 +36,15 @@ class MusicController: NSObject, AVAudioPlayerDelegate  {
         case HISTORY
     }
     
-    //MARK: publicプロパティ
+    //Notification
+    let MusicControllerOnTrackChangedNotification = "MusicControllerOnTrackChangedNotification"
+    let MusicControllerOnPlaybackStateChangedNotification = "MusicControllerOnPlaybackStateChangedNotification"
+    
+    //MARK: - publicプロパティ
     //プレイヤー
     //let player = MPMusicPlayerController.applicationMusicPlayer
     var player: AVAudioPlayer!
-    var playingList: Array<MusicData.SongItem>!
+    var playingList: Array<MusicItem.SongItem>!
     var playingNumber: Int
     var playingMediaItem: MPMediaItem!
     
@@ -51,13 +57,13 @@ class MusicController: NSObject, AVAudioPlayerDelegate  {
     var repeatCount = 0
     private var remainCount = 0
     
-    //MARK: privateプロパティ
+    //MARK: - privateプロパティ
     private let audioSession: AVAudioSession
     private let commandCenter: MPRemoteCommandCenter
     private let nowPlayingInfoCenter: MPNowPlayingInfoCenter
     private let notificationCenter: NotificationCenter
     
-    //MARK: 初期化
+    //MARK: - 初期化
     private override init(){
         
         //UIApplication.shared.beginReceivingRemoteControlEvents()
@@ -82,7 +88,7 @@ class MusicController: NSObject, AVAudioPlayerDelegate  {
         
     }
     
-    //MARK: 状態取得
+    //MARK: - 状態取得
     func hasQue() -> Bool {
         if self.playingList != nil {
             return true
@@ -108,9 +114,9 @@ class MusicController: NSObject, AVAudioPlayerDelegate  {
         return false
     }
     
-    //MARK: プレイヤー
+    //MARK: - プレイヤーセットアップ
     //曲のセット：リストデータと開始番号
-    func setPlayer(list: Array<MusicData.SongItem>, playId: Int = 0){
+    func setPlayer(list: Array<MusicItem.SongItem>, playId: Int = 0){
         
         self.playingList = list
         self.playingNumber = playId;
@@ -121,7 +127,7 @@ class MusicController: NSObject, AVAudioPlayerDelegate  {
             self.playingNumber = playingList.count - 1
         }
         
-        let song: MusicData.SongItem = playingList[playingNumber]
+        let song: MusicItem.SongItem = playingList[playingNumber]
         let mediaItem: MPMediaItem = song.mediaItem!
         
         setMediaItem(mediaItem: mediaItem)
@@ -148,7 +154,7 @@ class MusicController: NSObject, AVAudioPlayerDelegate  {
         updateNowPlayingInfoCenter()
     }
     
-    //MARK: プレイヤー制御
+    //MARK: - プレイヤーコントロール
     func play() {
         if self.player != nil{
             self.currentStatus = PlayerStatus.PLAY
@@ -165,15 +171,18 @@ class MusicController: NSObject, AVAudioPlayerDelegate  {
         if self.player != nil{
             if playingNumber < playingList.count {
                 self.playingNumber += 1
-                let song: MusicData.SongItem = playingList[playingNumber]
+                let song: MusicItem.SongItem = playingList[playingNumber]
                 let mediaItem: MPMediaItem = song.mediaItem!
                 setMediaItem(mediaItem: mediaItem)
             }else{
                 if self.currentMode == PlayerMode.UNLIMITED {
                     self.playingNumber = 0
-                    let song: MusicData.SongItem = playingList[playingNumber]
+                    let song: MusicItem.SongItem = playingList[playingNumber]
                     let mediaItem: MPMediaItem = song.mediaItem!
                     setMediaItem(mediaItem: mediaItem)
+                }else{
+                    self.currentStatus = PlayerStatus.PAUSE
+                    setPlayer(playId: 0)
                 }
             }
             
@@ -184,15 +193,22 @@ class MusicController: NSObject, AVAudioPlayerDelegate  {
     }
     func prev() {
         if self.player != nil{
+            
+            //3秒以上は頭出し
+            if self.player.currentTime > 3 {
+                self.player.currentTime = 0
+                return
+            }
+            
             if playingNumber > 0 {
                 self.playingNumber -= 1
-                let song: MusicData.SongItem = playingList[playingNumber]
+                let song: MusicItem.SongItem = playingList[playingNumber]
                 let mediaItem: MPMediaItem = song.mediaItem!
                 setMediaItem(mediaItem: mediaItem)
             }else{
                 if self.currentMode == PlayerMode.UNLIMITED {
                     self.playingNumber = playingList.count-1
-                    let song: MusicData.SongItem = playingList[playingNumber]
+                    let song: MusicItem.SongItem = playingList[playingNumber]
                     let mediaItem: MPMediaItem = song.mediaItem!
                     setMediaItem(mediaItem: mediaItem)
                 }
@@ -229,7 +245,7 @@ class MusicController: NSObject, AVAudioPlayerDelegate  {
     func setModeUnlimited(){
     }
     
-    //MARK: MPRemoteCommandCenter制御
+    //MARK: - MPRemoteCommandCenter制御
     private func configureCommandCenter() {
         self.commandCenter.playCommand.addTarget (handler: { [weak self] event -> MPRemoteCommandHandlerStatus in
             guard let sself = self else { return .commandFailed }
@@ -300,14 +316,14 @@ class MusicController: NSObject, AVAudioPlayerDelegate  {
         }
     }
     
-    //MARK: MPNowPlayingInfoCenter制御
+    //MARK: - MPNowPlayingInfoCenter制御
     private func updateNowPlayingInfoCenter(){
         if playingMediaItem != nil {
             self.nowPlayingInfoCenter.nowPlayingInfo = [
-                MPMediaItemPropertyTitle: playingMediaItem.title ?? "",
-                MPMediaItemPropertyAlbumTitle: playingMediaItem.albumTitle ?? "",
-                MPMediaItemPropertyArtist: playingMediaItem.artist ?? "",
-                MPMediaItemPropertyPlaybackDuration: player.duration,
+                MPMediaItemPropertyTitle: self.playingMediaItem.title ?? "",
+                MPMediaItemPropertyAlbumTitle: self.playingMediaItem.albumTitle ?? "",
+                MPMediaItemPropertyArtist: self.playingMediaItem.artist ?? "",
+                MPMediaItemPropertyPlaybackDuration: self.player.duration,
                 MPNowPlayingInfoPropertyPlaybackRate: NSNumber(value: 1.0 as Float)] as [String : Any]
             
             if playingMediaItem.artwork != nil {
@@ -320,37 +336,22 @@ class MusicController: NSObject, AVAudioPlayerDelegate  {
     
     //MARK: - AVAudioPlayerDelegate
     open func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
-        /*
-        if self.nextPlaybackItem == nil {
-            self.endPlayback()
-        }
-        else {
-            self.nextTrack()
-        }
-         */
+        next()
     }
-    
-    open func endPlayback() {
-        /*
-        self.currentPlaybackItem = nil
-        self.audioPlayer = nil
-        
-        self.updateNowPlayingInfoForCurrentPlaybackItem()
-        self.notifyOnTrackChanged()
-         */
-    }
-    
     open func audioPlayerBeginInterruption(_ player: AVAudioPlayer) {
-        /*
         self.notifyOnPlaybackStateChanged()
-         */
     }
-    
     open func audioPlayerEndInterruption(_ player: AVAudioPlayer, withOptions flags: Int) {
-        /*
         if AVAudioSessionInterruptionOptions(rawValue: UInt(flags)) == .shouldResume {
             self.play()
         }
-         */
+    }
+    
+    //MARK: - Notification
+    func notifyOnPlaybackStateChanged() {
+        self.notificationCenter.post(name: Notification.Name(rawValue: MusicControllerOnPlaybackStateChangedNotification), object: self)
+    }
+    func notifyOnTrackChanged() {
+        self.notificationCenter.post(name: Notification.Name(rawValue: MusicControllerOnTrackChangedNotification), object: self)
     }
 }

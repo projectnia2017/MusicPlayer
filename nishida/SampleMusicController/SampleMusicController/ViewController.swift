@@ -22,7 +22,7 @@ class ViewController: UIViewController {
         //メディア利用の許可確認
         MPMediaLibrary.requestAuthorization { (status) in
             if status == .authorized {
-                self.loadPlaylist()
+                self.load()
             } else {
                 print("not authorization")
             }
@@ -41,17 +41,29 @@ class ViewController: UIViewController {
         // Dispose of any resources that can be recreated.
     }
     
-    func loadPlaylist(){
+    func load(){
         
-        let playlists:Array<MusicData.PlaylistItem> = musicDataController.getPlaylists(sortOrder: MusicDataController.SortOrder.ASCENDING)
-        for playlist:MusicData.PlaylistItem in playlists{
-            print("\(playlist.id):\(playlist.title)")
+        //プレイリスト一覧の取得
+        let playlists:Array<MusicItem.PlaylistItem> = musicDataController.getPlaylists(sortOrder: MusicDataController.SortOrder.ASCENDING)
+        for playlist:MusicItem.PlaylistItem in playlists{
+            //print("\(playlist.id):\(playlist.title)")
         }
         
-        let songs:Array<MusicData.SongItem> = musicDataController.getSongsWithPlaylist(id: 0, sortType: MusicDataController.SortType.TITLE, sortOrder: MusicDataController.SortOrder.ASCENDING)
-        //let songs:Array<MusicData.SongItem> = musicDataController.getSongsWithPlaylist(id: 0, sortType: MusicDataController.SortType.ALBUM, sortOrder: MusicDataController.SortOrder.DESCENDING)
-        for song:MusicData.SongItem in songs{
-            print("\(song.id):\(song.title):\(song.artist):\(song.albumTitle)")
+        //アルバム一覧の取得
+        let albums:Array<MusicItem.AlbumItem> = musicDataController.getAlbums(sortOrder: MusicDataController.SortOrder.ASCENDING)
+        for album:MusicItem.AlbumItem in albums{
+            //print("\(album.id):\(album.title):\(album.artist)")
+        }
+        
+        //プレイリスト内の曲の取得
+        //let songs:Array<MusicItem.SongItem> = musicDataController.getSongsWithPlaylist(id: 0, sortType: MusicDataController.SortType.TITLE, sortOrder: MusicDataController.SortOrder.ASCENDING)
+        //let songs:Array<MusicItem.SongItem> = musicDataController.getSongsWithPlaylist(id: 0, sortType: MusicDataController.SortType.ALBUM, sortOrder: MusicDataController.SortOrder.DESCENDING)
+        
+        //アルバム内の曲の取得
+        let songs:Array<MusicItem.SongItem> = musicDataController.getSongsWithAlbum(id: 60, sortType: MusicDataController.SortType.TRACKNUMBER, sortOrder: MusicDataController.SortOrder.ASCENDING)
+        
+        for song:MusicItem.SongItem in songs{
+            print("\(song.id):\(song.title):\(song.artist):\(song.albumTitle):\(song.duration)")
         }
         
         musicController.setPlayer(list: songs, playId: 5)
