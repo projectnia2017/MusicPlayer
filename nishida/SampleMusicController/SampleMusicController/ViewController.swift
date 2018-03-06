@@ -56,17 +56,17 @@ class ViewController: UIViewController {
         }
         
         //プレイリスト内の曲の取得
-        //let songs:Array<MusicItem.SongItem> = musicDataController.getSongsWithPlaylist(id: 0, sortType: MusicDataController.SortType.TITLE, sortOrder: MusicDataController.SortOrder.ASCENDING)
-        //let songs:Array<MusicItem.SongItem> = musicDataController.getSongsWithPlaylist(id: 0, sortType: MusicDataController.SortType.ALBUM, sortOrder: MusicDataController.SortOrder.DESCENDING)
+        let songs:Array<MusicItem.SongItem> = musicDataController.getSongsWithPlaylist(id: 3, sortType: MusicDataController.SortType.ARTIST, sortOrder: MusicDataController.SortOrder.ASCENDING)
         
         //アルバム内の曲の取得
-        let songs:Array<MusicItem.SongItem> = musicDataController.getSongsWithAlbum(id: 60, sortType: MusicDataController.SortType.TRACKNUMBER, sortOrder: MusicDataController.SortOrder.ASCENDING)
+        //let songs:Array<MusicItem.SongItem> = musicDataController.getSongsWithAlbum(id: 60, sortType: MusicDataController.SortType.TRACKNUMBER, sortOrder: MusicDataController.SortOrder.ASCENDING)
         
         for song:MusicItem.SongItem in songs{
             print("\(song.id):\(song.title):\(song.artist):\(song.albumTitle):\(song.duration)")
         }
         
         musicController.setPlayer(list: songs, playId: 5)
+        //musicController.play()
     }
 
     @IBAction func playMusic(_ sender: Any) {

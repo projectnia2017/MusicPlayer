@@ -33,9 +33,9 @@ class MusicDataController: NSObject, AVAudioPlayerDelegate  {
     }
     
     //ソート順
-    let SortTypeListPlaylist:Array<SortType> = [SortType.DEFAULT, SortType.SHUFFLE,SortType.TITLE, SortType.ARTIST, SortType.ALBUM]
-    let SortTypeListAlbum:Array<SortType> = [SortType.DEFAULT, SortType.SHUFFLE, SortType.TITLE, SortType.TRACKNUMBER]
-    let SortTypeListArtist:Array<SortType> = [SortType.DEFAULT, SortType.SHUFFLE, SortType.TITLE, SortType.ALBUM]
+    let SortTypeListPlaylist:Array<SortType> = [SortType.TITLE]
+    let SortTypeListAlbum:Array<SortType> = [SortType.TITLE, SortType.ARTIST]
+    let SortTypeListArtist:Array<SortType> = [SortType.ARTIST]
     let SortTypeListSong:Array<SortType> = [SortType.TITLE, SortType.SHUFFLE,SortType.ARTIST, SortType.ALBUM]
     let SortTypeListHistory:Array<SortType> = [SortType.DATEPLAYED]
     
@@ -52,6 +52,8 @@ class MusicDataController: NSObject, AVAudioPlayerDelegate  {
     //MARK: - 音楽情報取得
     //プレイリスト情報
     func getPlaylists(sortOrder:SortOrder = SortOrder.ASCENDING) -> Array<MusicItem.PlaylistItem> {
+        
+        self.currentSortOrder = sortOrder
         
         //クエリー取得
         let playlistQuery = MPMediaQuery.playlists()
@@ -215,6 +217,11 @@ class MusicDataController: NSObject, AVAudioPlayerDelegate  {
             }
             break
         case .SHUFFLE:
+            
+            
+            
+            
+            
             break
         case .TITLE:
             if sortOrder == SortOrder.ASCENDING {
@@ -252,7 +259,6 @@ class MusicDataController: NSObject, AVAudioPlayerDelegate  {
         case .TRACKNUMBER:
             if sortOrder == SortOrder.ASCENDING {
                 sortedList = songList.sorted(by: {$0.trackNumber < $1.trackNumber})
-                
             }else{
                 sortedList = songList.sorted(by: {$0.trackNumber > $1.trackNumber})
             }
