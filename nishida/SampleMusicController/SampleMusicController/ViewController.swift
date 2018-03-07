@@ -46,7 +46,7 @@ class ViewController: UIViewController {
         //プレイリスト一覧の取得
         let playlists:Array<MusicItem.PlaylistItem> = musicDataController.getPlaylists(sortOrder: MusicDataController.SortOrder.ASCENDING)
         for playlist:MusicItem.PlaylistItem in playlists{
-            //print("\(playlist.id):\(playlist.title)")
+            print("\(playlist.id):\(playlist.title)")
         }
         
         //アルバム一覧の取得
@@ -55,8 +55,11 @@ class ViewController: UIViewController {
             //print("\(album.id):\(album.title):\(album.artist)")
         }
         
+    }
+
+    @IBAction func musicSet(_ sender: Any) {
         //プレイリスト内の曲の取得
-        let songs:Array<MusicItem.SongItem> = musicDataController.getSongsWithPlaylist(id: 3, sortType: MusicDataController.SortType.ARTIST, sortOrder: MusicDataController.SortOrder.ASCENDING)
+        let songs:Array<MusicItem.SongItem> = musicDataController.getSongsWithPlaylist(id: 4, sortType: MusicDataController.SortType.ARTIST, sortOrder: MusicDataController.SortOrder.ASCENDING)
         
         //アルバム内の曲の取得
         //let songs:Array<MusicItem.SongItem> = musicDataController.getSongsWithAlbum(id: 60, sortType: MusicDataController.SortType.TRACKNUMBER, sortOrder: MusicDataController.SortOrder.ASCENDING)
@@ -65,10 +68,19 @@ class ViewController: UIViewController {
             print("\(song.id):\(song.title):\(song.artist):\(song.albumTitle):\(song.duration)")
         }
         
-        musicController.setPlayer(list: songs, playId: 5)
-        //musicController.play()
+        //ループ設定
+        musicController.setLoopMode(mode: MusicController.LoopMode.NOLOOP)
+        //musicController.setLoopMode(mode: MusicController.LoopMode.LOOP)
+        
+        //リピート設定
+        musicController.setRepeatMode(mode: MusicController.RepeatMode.NOREPEAT)
+        //musicController.setRepeatMode(mode: MusicController.RepeatMode.REPEAT)
+        //musicController.setRepeatMode(mode: MusicController.RepeatMode.COUNT, count: 3)
+        
+        //プレイヤーの設定
+        musicController.setPlayer(list: songs, playId: 0)
     }
-
+    
     @IBAction func playMusic(_ sender: Any) {
         musicController.play()
         print("\(musicController.currentStatus)")

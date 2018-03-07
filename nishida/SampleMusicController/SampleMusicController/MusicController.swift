@@ -18,15 +18,20 @@ class MusicController: NSObject, AVAudioPlayerDelegate  {
     //MARK: - 定義
     //定数
     public enum PlayerStatus {
+        case READY
+        case STANDBY
         case PLAY
         case PAUSE
         case STOP
     }
-    public enum PlayerMode {
-        case NORMAL
+    public enum LoopMode {
+        case NOLOOP
+        case LOOP
+    }
+    public enum RepeatMode {
+        case NOREPEAT
         case REPEAT
         case COUNT
-        case UNLIMITED
     }
     public enum PlayerType {
         case PLAYLIST
@@ -50,18 +55,20 @@ class MusicController: NSObject, AVAudioPlayerDelegate  {
     
     //状態
     var currentStatus: PlayerStatus = PlayerStatus.STOP
-    var currentMode:PlayerMode = PlayerMode.NORMAL
     var currentType:PlayerType = PlayerType.PLAYLIST
+    var currentLoopMode:LoopMode = LoopMode.NOLOOP
+    var currentRepeatMode:RepeatMode = RepeatMode.NOREPEAT
     
     //カウント付きリピート
     var repeatCount = 0
-    private var remainCount = 0
+    private var currentCount = 0
     
     //MARK: - privateプロパティ
     private let audioSession: AVAudioSession
     private let commandCenter: MPRemoteCommandCenter
     private let nowPlayingInfoCenter: MPNowPlayingInfoCenter
     private let notificationCenter: NotificationCenter
+    private var changeArtworkIntervalTimer: Timer?
     
     //MARK: - 初期化
     private override init(){
@@ -77,7 +84,8 @@ class MusicController: NSObject, AVAudioPlayerDelegate  {
         self.commandCenter = MPRemoteCommandCenter.shared()
         self.nowPlayingInfoCenter = MPNowPlayingInfoCenter.default()
         self.notificationCenter = NotificationCenter.default
-        
+        self.changeArtworkIntervalTimer = nil
+            
         try! self.audioSession.setCategory(AVAudioSessionCategoryPlayback)
         try! self.audioSession.setActive(true)
         
@@ -140,6 +148,10 @@ class MusicController: NSObject, AVAudioPlayerDelegate  {
     }
     private func setMediaItem(mediaItem: MPMediaItem){
         
+        if mediaItem === self.playingMediaItem {
+            //return
+        }
+        
         let url: NSURL = mediaItem.assetURL! as NSURL
         do {
             self.player = try AVAudioPlayer(contentsOf: url as URL)
@@ -153,37 +165,173 @@ class MusicController: NSObject, AVAudioPlayerDelegate  {
         updateCommandCenter()
         updateNowPlayingInfoCenter()
     }
+    //モード設定
+    func setLoopMode(mode: LoopMode = LoopMode.NOLOOP){
+        self.currentLoopMode = mode
+    }
+    func setRepeatMode(mode: RepeatMode = RepeatMode.NOREPEAT, count: Int = 1){
+        self.currentRepeatMode = mode
+        
+        switch mode {
+        case RepeatMode.NOREPEAT:
+            break;
+        case RepeatMode.REPEAT:
+            break;
+        case RepeatMode.COUNT:
+            self.repeatCount = count;
+            self.currentCount = 0;
+            break;
+        }
+        
+    }
+    //モードの設定を数値で取得
+    private func getModeNumber() -> Int {
+        var modeNumber: Int = 0
+        
+        switch self.currentLoopMode {
+        case LoopMode.NOLOOP:
+            modeNumber += 1
+            break
+        case LoopMode.LOOP:
+            modeNumber += 2
+            break
+        }
+        
+        switch self.currentRepeatMode {
+        case RepeatMode.NOREPEAT:
+            modeNumber += 10
+            break
+        case RepeatMode.REPEAT:
+            modeNumber += 20
+            break
+        case RepeatMode.COUNT:
+            modeNumber += 30
+            break
+        }
+        
+        return modeNumber
+    }
+    
+    //リピートカウント
+    func countUp(){
+        self.repeatCount += 1
+    }
+    func countDown(){
+        self.repeatCount -= 1
+        if self.repeatCount < 1 {
+            self.repeatCount = 1
+        }
+    }
     
     //MARK: - プレイヤーコントロール
-    func play() {
+    func play(auto: Bool = false) {
         if self.player != nil{
             self.currentStatus = PlayerStatus.PLAY
             self.player.play()
+            
+            //MPNowPlayingInfoCenterのPositionCommand対応
+            self.nowPlayingInfoCenter.nowPlayingInfo![MPNowPlayingInfoPropertyElapsedPlaybackTime] = self.player.currentTime
+            self.nowPlayingInfoCenter.nowPlayingInfo![MPNowPlayingInfoPropertyPlaybackRate] = 1
         }
     }
-    func pause() {
+    func pause(auto: Bool = false) {
         if self.player != nil{
             self.currentStatus = PlayerStatus.PAUSE
             self.player.pause()
+            
+            //MPNowPlayingInfoCenterのPositionCommand対応
+            self.nowPlayingInfoCenter.nowPlayingInfo![MPNowPlayingInfoPropertyPlaybackRate] = 0
+            self.nowPlayingInfoCenter.nowPlayingInfo![MPNowPlayingInfoPropertyElapsedPlaybackTime] = self.player.currentTime
         }
     }
-    func next() {
-        if self.player != nil{
-            if playingNumber < playingList.count {
-                self.playingNumber += 1
-                let song: MusicItem.SongItem = playingList[playingNumber]
-                let mediaItem: MPMediaItem = song.mediaItem!
-                setMediaItem(mediaItem: mediaItem)
-            }else{
-                if self.currentMode == PlayerMode.UNLIMITED {
-                    self.playingNumber = 0
-                    let song: MusicItem.SongItem = playingList[playingNumber]
-                    let mediaItem: MPMediaItem = song.mediaItem!
-                    setMediaItem(mediaItem: mediaItem)
-                }else{
+    
+    func next(auto: Bool = false) {
+        if self.player != nil {
+            
+            //各モードでの動作
+            let modeNumber = getModeNumber()
+            
+            switch modeNumber {
+            case 11:
+                //norepeat noloop
+                if self.playingNumber < self.playingList.count - 1 {
+                    setPlayer(playId: self.playingNumber + 1)
+                } else {
                     self.currentStatus = PlayerStatus.PAUSE
+                }
+                break
+            case 12:
+                //norepeat loop
+                if self.playingNumber < self.playingList.count - 1 {
+                    setPlayer(playId: self.playingNumber + 1)
+                } else {
                     setPlayer(playId: 0)
                 }
+                break
+            case 21:
+                //repeat noloop
+                setPlayer(playId: self.playingNumber)
+                break
+            case 22:
+                //repeat loop
+                setPlayer(playId: self.playingNumber)
+                break
+            case 31:
+                //count noloop
+                if auto == false {
+                    //手動での次曲
+                    if self.playingNumber < self.playingList.count - 1 {
+                        self.currentCount = 0
+                        setPlayer(playId: self.playingNumber + 1)
+                    } else {
+                        self.currentStatus = PlayerStatus.PAUSE
+                    }
+                } else {
+                    //自動での次曲
+                    self.currentCount += 1
+                    
+                    if self.currentCount < self.repeatCount{
+                        setPlayer(playId: self.playingNumber)
+                    } else {
+                        self.currentCount = 0
+                        
+                        if self.playingNumber < self.playingList.count - 1 {
+                            setPlayer(playId: self.playingNumber + 1)
+                        } else {
+                            self.currentStatus = PlayerStatus.PAUSE
+                        }
+                    }
+                }
+                break
+            case 32:
+                //count loop
+                if auto == false {
+                    //手動での次曲
+                    if self.playingNumber < self.playingList.count - 1 {
+                        self.currentCount = 0
+                        setPlayer(playId: self.playingNumber + 1)
+                    } else {
+                        setPlayer(playId: 0)
+                    }
+                } else {
+                    //自動での次曲
+                    self.currentCount += 1
+                    
+                    if self.currentCount < self.repeatCount{
+                        setPlayer(playId: self.playingNumber)
+                    } else {
+                        self.currentCount = 0
+                        
+                        if self.playingNumber < self.playingList.count - 1 {
+                            setPlayer(playId: self.playingNumber + 1)
+                        } else {
+                            setPlayer(playId: 0)
+                        }
+                    }
+                }
+                break
+            default:
+                break
             }
             
             if self.currentStatus == PlayerStatus.PLAY {
@@ -191,27 +339,64 @@ class MusicController: NSObject, AVAudioPlayerDelegate  {
             }
         }
     }
-    func prev() {
+    func prev(auto: Bool = false) {
         if self.player != nil{
             
             //3秒以上は頭出し
             if self.player.currentTime > 3 {
-                self.player.currentTime = 0
+                cueing()
                 return
             }
             
-            if playingNumber > 0 {
-                self.playingNumber -= 1
-                let song: MusicItem.SongItem = playingList[playingNumber]
-                let mediaItem: MPMediaItem = song.mediaItem!
-                setMediaItem(mediaItem: mediaItem)
-            }else{
-                if self.currentMode == PlayerMode.UNLIMITED {
-                    self.playingNumber = playingList.count-1
-                    let song: MusicItem.SongItem = playingList[playingNumber]
-                    let mediaItem: MPMediaItem = song.mediaItem!
-                    setMediaItem(mediaItem: mediaItem)
+            //各モードでの動作
+            let modeNumber = getModeNumber()
+            
+            switch modeNumber {
+            case 11:
+                //norepeat noloop
+                if self.playingNumber > 0 {
+                    setPlayer(playId: self.playingNumber - 1)
+                } else {
+                    //頭出し
+                    cueing()
                 }
+                break
+            case 12:
+                //norepeat loop
+                if self.playingNumber > 0 {
+                    setPlayer(playId: self.playingNumber - 1)
+                } else {
+                    setPlayer(playId: self.playingList.count - 1)
+                }
+                break
+            case 21:
+                //repeat noloop
+                setPlayer(playId: self.playingNumber)
+                break
+            case 22:
+                //repeat loop
+                setPlayer(playId: self.playingNumber)
+                break
+            case 31:
+                //count noloop
+                self.currentCount = 0
+                if self.playingNumber > 0 {
+                    setPlayer(playId: self.playingNumber + 1)
+                } else {
+                    self.currentStatus = PlayerStatus.PAUSE
+                }
+                break
+            case 32:
+                //count loop
+                self.currentCount = 0
+                if self.playingNumber > 0 {
+                    setPlayer(playId: self.playingNumber - 1)
+                } else {
+                    setPlayer(playId: self.playingList.count - 1)
+                }
+                break
+            default:
+                break
             }
             
             if self.currentStatus == PlayerStatus.PLAY {
@@ -219,7 +404,7 @@ class MusicController: NSObject, AVAudioPlayerDelegate  {
             }
         }
     }
-    func stop() {
+    func stop(auto: Bool = false) {
         if self.player != nil{
             self.currentStatus = PlayerStatus.STOP
             self.player.stop()
@@ -230,19 +415,28 @@ class MusicController: NSObject, AVAudioPlayerDelegate  {
             self.playingList = nil
             self.playingMediaItem = nil
             
+            self.repeatCount = 0
+            self.currentCount = 0
+            
             updateCommandCenter()
             updateNowPlayingInfoCenter()
         }
     }
-    
-    //モード変更
-    func setModeNormal(){
+    //頭出し
+    func cueing() {
+        self.pause()
+        self.player.currentTime = 0
+        
+        Timer.scheduledTimer(timeInterval: 0.3,
+                             target: self,
+                             selector: #selector(MusicController.changeInformationAfterCueing),
+                             userInfo: nil,
+                             repeats: false)
+        
+        
     }
-    func setModeRepeat(){
-    }
-    func setModeCount(count: Int){
-    }
-    func setModeUnlimited(){
+    @objc private func changeInformationAfterCueing(){
+        self.play()
     }
     
     //MARK: - MPRemoteCommandCenter制御
@@ -287,22 +481,24 @@ class MusicController: NSObject, AVAudioPlayerDelegate  {
             self.commandCenter.pauseCommand.isEnabled = true
             self.commandCenter.changePlaybackPositionCommand.isEnabled = true
             
-            if playingNumber > 0 {
-                self.commandCenter.previousTrackCommand.isEnabled = true
-            }else{
-                if self.currentMode == PlayerMode.UNLIMITED {
-                    self.commandCenter.previousTrackCommand.isEnabled = true
-                }else{
-                    self.commandCenter.previousTrackCommand.isEnabled = false
-                }
-            }
+            self.commandCenter.previousTrackCommand.isEnabled = true
+            
+//            if playingNumber > 0 {
+//                self.commandCenter.previousTrackCommand.isEnabled = true
+//            } else {
+//                if self.currentLoopMode == LoopMode.LOOP {
+//                    self.commandCenter.previousTrackCommand.isEnabled = true
+//                } else {
+//                    self.commandCenter.previousTrackCommand.isEnabled = false
+//                }
+//            }
             
             if playingNumber < playingList.count-1 {
                 self.commandCenter.nextTrackCommand.isEnabled = true
-            }else{
-                if self.currentMode == PlayerMode.UNLIMITED {
+            } else {
+                if self.currentLoopMode == LoopMode.LOOP {
                     self.commandCenter.nextTrackCommand.isEnabled = true
-                }else{
+                } else {
                     self.commandCenter.nextTrackCommand.isEnabled = false
                     
                 }
@@ -318,17 +514,15 @@ class MusicController: NSObject, AVAudioPlayerDelegate  {
     
     //MARK: - MPNowPlayingInfoCenter制御
     private func updateNowPlayingInfoCenter(){
-        if playingMediaItem != nil {
+        if self.playingMediaItem != nil {
             self.nowPlayingInfoCenter.nowPlayingInfo = [
                 MPMediaItemPropertyTitle: self.playingMediaItem.title ?? "",
                 MPMediaItemPropertyAlbumTitle: self.playingMediaItem.albumTitle ?? "",
                 MPMediaItemPropertyArtist: self.playingMediaItem.artist ?? "",
                 MPMediaItemPropertyPlaybackDuration: self.player.duration,
+                MPNowPlayingInfoPropertyElapsedPlaybackTime: 0,
+                MPMediaItemPropertyArtwork:self.playingMediaItem.artwork!,
                 MPNowPlayingInfoPropertyPlaybackRate: NSNumber(value: 1.0 as Float)] as [String : Any]
-            
-            if playingMediaItem.artwork != nil {
-                self.nowPlayingInfoCenter.nowPlayingInfo![MPMediaItemPropertyArtwork] = playingMediaItem.artwork
-            }
         } else{
             self.nowPlayingInfoCenter.nowPlayingInfo = nil
         }
@@ -336,7 +530,7 @@ class MusicController: NSObject, AVAudioPlayerDelegate  {
     
     //MARK: - AVAudioPlayerDelegate
     open func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
-        next()
+        next(auto: true)
     }
     open func audioPlayerBeginInterruption(_ player: AVAudioPlayer) {
         self.notifyOnPlaybackStateChanged()
