@@ -10,6 +10,7 @@
 import Foundation
 import AVFoundation
 import MediaPlayer
+import RealmSwift
 
 class MusicController: NSObject, AVAudioPlayerDelegate  {
     //シングルトン
@@ -49,7 +50,7 @@ class MusicController: NSObject, AVAudioPlayerDelegate  {
     //プレイヤー
     //let player = MPMusicPlayerController.applicationMusicPlayer
     var player: AVAudioPlayer!
-    var playingList: Array<MusicItem.SongItem>!
+    var playingList: Array<SongItem>!
     var playingNumber: Int
     var playingMediaItem: MPMediaItem!
     
@@ -70,6 +71,8 @@ class MusicController: NSObject, AVAudioPlayerDelegate  {
     private let notificationCenter: NotificationCenter
     private var changeArtworkIntervalTimer: Timer?
     
+    private let realm: Realm
+    
     //MARK: - 初期化
     private override init(){
         
@@ -89,6 +92,7 @@ class MusicController: NSObject, AVAudioPlayerDelegate  {
         try! self.audioSession.setCategory(AVAudioSessionCategoryPlayback)
         try! self.audioSession.setActive(true)
         
+        self.realm = try! Realm()
         
         super.init()
         
@@ -124,7 +128,7 @@ class MusicController: NSObject, AVAudioPlayerDelegate  {
     
     //MARK: - プレイヤーセットアップ
     //曲のセット：リストデータと開始番号
-    func setPlayer(list: Array<MusicItem.SongItem>, playId: Int = 0){
+    func setPlayer(list: Array<SongItem>, playId: Int = 0){
         
         self.playingList = list
         self.playingNumber = playId;
@@ -135,7 +139,7 @@ class MusicController: NSObject, AVAudioPlayerDelegate  {
             self.playingNumber = playingList.count - 1
         }
         
-        let song: MusicItem.SongItem = playingList[playingNumber]
+        let song: SongItem = playingList[playingNumber]
         let mediaItem: MPMediaItem = song.mediaItem!
         
         setMediaItem(mediaItem: mediaItem)
@@ -149,7 +153,7 @@ class MusicController: NSObject, AVAudioPlayerDelegate  {
     private func setMediaItem(mediaItem: MPMediaItem){
         
         if mediaItem === self.playingMediaItem {
-            //return
+            return
         }
         
         let url: NSURL = mediaItem.assetURL! as NSURL
@@ -158,6 +162,10 @@ class MusicController: NSObject, AVAudioPlayerDelegate  {
             self.player.delegate = self
             self.player.prepareToPlay()
             self.playingMediaItem = mediaItem
+            
+            //再生時刻・カウントの書き込み
+            writePlayingData()
+            
         } catch {
             self.player = nil
         }
@@ -247,6 +255,11 @@ class MusicController: NSObject, AVAudioPlayerDelegate  {
     
     func next(auto: Bool = false) {
         if self.player != nil {
+            
+            //スキップカウントの書き込み
+            if auto == false {
+                writeSkipData()
+            }
             
             //各モードでの動作
             let modeNumber = getModeNumber()
@@ -348,6 +361,11 @@ class MusicController: NSObject, AVAudioPlayerDelegate  {
                 return
             }
             
+            //スキップカウントの書き込み
+            if auto == false {
+                writeSkipData()
+            }
+            
             //各モードでの動作
             let modeNumber = getModeNumber()
             
@@ -357,7 +375,7 @@ class MusicController: NSObject, AVAudioPlayerDelegate  {
                 if self.playingNumber > 0 {
                     setPlayer(playId: self.playingNumber - 1)
                 } else {
-                    //頭出し
+                    //ループしない場合は頭出し
                     cueing()
                 }
                 break
@@ -483,16 +501,6 @@ class MusicController: NSObject, AVAudioPlayerDelegate  {
             
             self.commandCenter.previousTrackCommand.isEnabled = true
             
-//            if playingNumber > 0 {
-//                self.commandCenter.previousTrackCommand.isEnabled = true
-//            } else {
-//                if self.currentLoopMode == LoopMode.LOOP {
-//                    self.commandCenter.previousTrackCommand.isEnabled = true
-//                } else {
-//                    self.commandCenter.previousTrackCommand.isEnabled = false
-//                }
-//            }
-            
             if playingNumber < playingList.count-1 {
                 self.commandCenter.nextTrackCommand.isEnabled = true
             } else {
@@ -520,9 +528,8 @@ class MusicController: NSObject, AVAudioPlayerDelegate  {
                 MPMediaItemPropertyAlbumTitle: self.playingMediaItem.albumTitle ?? "",
                 MPMediaItemPropertyArtist: self.playingMediaItem.artist ?? "",
                 MPMediaItemPropertyPlaybackDuration: self.player.duration,
-                MPNowPlayingInfoPropertyElapsedPlaybackTime: 0,
                 MPMediaItemPropertyArtwork:self.playingMediaItem.artwork!,
-                MPNowPlayingInfoPropertyPlaybackRate: NSNumber(value: 1.0 as Float)] as [String : Any]
+                MPNowPlayingInfoPropertyPlaybackRate: 1]
         } else{
             self.nowPlayingInfoCenter.nowPlayingInfo = nil
         }
@@ -547,5 +554,52 @@ class MusicController: NSObject, AVAudioPlayerDelegate  {
     }
     func notifyOnTrackChanged() {
         self.notificationCenter.post(name: Notification.Name(rawValue: MusicControllerOnTrackChangedNotification), object: self)
+    }
+    
+    //MARK: - Realmデータベース
+    func writePlayingData() {
+        //Realmへ書き込み
+        let title: String = self.playingMediaItem.title!
+        let artist: String = self.playingMediaItem.artist!
+        let now = Date()
+        let history = realm.objects(PlayingData.self).filter("title == %@ && artist == %@", title, artist)
+        
+        if history.count > 0 {
+            autoreleasepool {
+                let playingData = history.first
+                try! realm.write {
+                    playingData?.lastPlayingDate = now
+                    playingData?.playCount += 1
+                }
+            }
+        } else {
+            autoreleasepool {
+                try! realm.write {
+                    realm.add(PlayingData(value: ["title": title, "artist": artist, "lastPlayingDate": now, "playCount": 1, "skipCount": 0]))
+                }
+            }
+        }
+    }
+    func writeSkipData() {
+        //Realmへ書き込み
+        let title: String = self.playingMediaItem.title!
+        let artist: String = self.playingMediaItem.artist!
+        let now = Date()
+        let history = realm.objects(PlayingData.self).filter("title == %@ && artist == %@", title, artist)
+        
+        if history.count > 0 {
+            autoreleasepool {
+                let playingData = history.first
+                try! realm.write {
+                    playingData?.skipCount += 1
+                }
+            }
+        } else {
+            autoreleasepool {
+                try! realm.write {
+                    realm.add(PlayingData(value: ["title": title, "artist": artist, "lastPlayingDate": now, "playCount": 0, "skipCount": 1]))
+                }
+            }
+        }
     }
 }

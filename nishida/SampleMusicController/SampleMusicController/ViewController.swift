@@ -44,14 +44,14 @@ class ViewController: UIViewController {
     func load(){
         
         //プレイリスト一覧の取得
-        let playlists:Array<MusicItem.PlaylistItem> = musicDataController.getPlaylists(sortOrder: MusicDataController.SortOrder.ASCENDING)
-        for playlist:MusicItem.PlaylistItem in playlists{
+        let playlists:Array<PlaylistItem> = musicDataController.getPlaylists(sortOrder: MusicDataController.SortOrder.ASCENDING)
+        for playlist:PlaylistItem in playlists{
             print("\(playlist.id):\(playlist.title)")
         }
         
         //アルバム一覧の取得
-        let albums:Array<MusicItem.AlbumItem> = musicDataController.getAlbums(sortOrder: MusicDataController.SortOrder.ASCENDING)
-        for album:MusicItem.AlbumItem in albums{
+        let albums:Array<AlbumItem> = musicDataController.getAlbums(sortOrder: MusicDataController.SortOrder.ASCENDING)
+        for album:AlbumItem in albums{
             //print("\(album.id):\(album.title):\(album.artist)")
         }
         
@@ -59,13 +59,13 @@ class ViewController: UIViewController {
 
     @IBAction func musicSet(_ sender: Any) {
         //プレイリスト内の曲の取得
-        let songs:Array<MusicItem.SongItem> = musicDataController.getSongsWithPlaylist(id: 4, sortType: MusicDataController.SortType.ARTIST, sortOrder: MusicDataController.SortOrder.ASCENDING)
+        let songs:Array<SongItem> = musicDataController.getSongsWithPlaylist(id: 4, sortType: MusicDataController.SortType.ARTIST, sortOrder: MusicDataController.SortOrder.ASCENDING)
         
         //アルバム内の曲の取得
-        //let songs:Array<MusicItem.SongItem> = musicDataController.getSongsWithAlbum(id: 60, sortType: MusicDataController.SortType.TRACKNUMBER, sortOrder: MusicDataController.SortOrder.ASCENDING)
+        //let songs:Array<SongItem> = musicDataController.getSongsWithAlbum(id: 60, sortType: MusicDataController.SortType.TRACKNUMBER, sortOrder: MusicDataController.SortOrder.ASCENDING)
         
-        for song:MusicItem.SongItem in songs{
-            print("\(song.id):\(song.title):\(song.artist):\(song.albumTitle):\(song.duration)")
+        for song:SongItem in songs{
+            print("\(song.id)/\(song.title)/\(song.artist)/\(song.albumTitle)/\(song.duration)/\(song.playCount)/\(song.skipCount)")
         }
         
         //ループ設定
