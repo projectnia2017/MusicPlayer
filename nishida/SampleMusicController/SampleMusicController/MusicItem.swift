@@ -9,8 +9,9 @@
 
 import Foundation
 import MediaPlayer
+import RealmSwift
 
-//MARK: - MusicItem
+//MARK: - MusicDataController
 class PlaylistItem {
     var id: Int = 0
     var title: String = ""
@@ -60,4 +61,15 @@ class SongItem {
     var skipCount: Int = 0
 }
 
-
+//MARK: - Realm
+class PlayingDataItem: Object {
+    @objc dynamic var title: String = ""
+    @objc dynamic var artist: String = ""
+    @objc dynamic var lastPlayingDate: Date? = nil
+    @objc dynamic var playCount: Int = 0
+    @objc dynamic var skipCount: Int = 0
+    
+    override static func primaryKey() -> String {
+        return "title"
+    }
+}

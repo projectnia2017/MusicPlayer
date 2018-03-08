@@ -164,7 +164,7 @@ class MusicController: NSObject, AVAudioPlayerDelegate  {
             self.playingMediaItem = mediaItem
             
             //再生時刻・カウントの書き込み
-            writePlayingData()
+            writePlayingDataItem()
             
         } catch {
             self.player = nil
@@ -557,25 +557,25 @@ class MusicController: NSObject, AVAudioPlayerDelegate  {
     }
     
     //MARK: - Realmデータベース
-    func writePlayingData() {
+    func writePlayingDataItem() {
         //Realmへ書き込み
         let title: String = self.playingMediaItem.title!
         let artist: String = self.playingMediaItem.artist!
         let now = Date()
-        let history = realm.objects(PlayingData.self).filter("title == %@ && artist == %@", title, artist)
+        let history = realm.objects(PlayingDataItem.self).filter("title == %@ && artist == %@", title, artist)
         
         if history.count > 0 {
             autoreleasepool {
-                let playingData = history.first
+                let PlayingDataItem = history.first
                 try! realm.write {
-                    playingData?.lastPlayingDate = now
-                    playingData?.playCount += 1
+                    PlayingDataItem?.lastPlayingDate = now
+                    PlayingDataItem?.playCount += 1
                 }
             }
         } else {
             autoreleasepool {
                 try! realm.write {
-                    realm.add(PlayingData(value: ["title": title, "artist": artist, "lastPlayingDate": now, "playCount": 1, "skipCount": 0]))
+                    realm.add(PlayingDataItem(value: ["title": title, "artist": artist, "lastPlayingDate": now, "playCount": 1, "skipCount": 0]))
                 }
             }
         }
@@ -585,19 +585,19 @@ class MusicController: NSObject, AVAudioPlayerDelegate  {
         let title: String = self.playingMediaItem.title!
         let artist: String = self.playingMediaItem.artist!
         let now = Date()
-        let history = realm.objects(PlayingData.self).filter("title == %@ && artist == %@", title, artist)
+        let history = realm.objects(PlayingDataItem.self).filter("title == %@ && artist == %@", title, artist)
         
         if history.count > 0 {
             autoreleasepool {
-                let playingData = history.first
+                let PlayingDataItem = history.first
                 try! realm.write {
-                    playingData?.skipCount += 1
+                    PlayingDataItem?.skipCount += 1
                 }
             }
         } else {
             autoreleasepool {
                 try! realm.write {
-                    realm.add(PlayingData(value: ["title": title, "artist": artist, "lastPlayingDate": now, "playCount": 0, "skipCount": 1]))
+                    realm.add(PlayingDataItem(value: ["title": title, "artist": artist, "lastPlayingDate": now, "playCount": 0, "skipCount": 1]))
                 }
             }
         }

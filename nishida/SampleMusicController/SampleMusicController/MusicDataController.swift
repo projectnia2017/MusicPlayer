@@ -202,11 +202,11 @@ class MusicDataController: NSObject, AVAudioPlayerDelegate  {
             item.mediaItem = song
             
             //Realmデータベースから再生情報を取得
-            let playingData:PlayingData? = searchPlayingData(title: item.title, artist: item.artist)
-            if playingData != nil {
-                item.lastPlayingDate = playingData?.lastPlayingDate
-                item.playCount = (playingData?.playCount)!
-                item.skipCount = (playingData?.skipCount)!
+            let PlayingDataItem:PlayingDataItem? = searchPlayingDataItem(title: item.title, artist: item.artist)
+            if PlayingDataItem != nil {
+                item.lastPlayingDate = PlayingDataItem?.lastPlayingDate
+                item.playCount = (PlayingDataItem?.playCount)!
+                item.skipCount = (PlayingDataItem?.skipCount)!
             }
             
             songList.append(item)
@@ -290,9 +290,9 @@ class MusicDataController: NSObject, AVAudioPlayerDelegate  {
     }
     
     //MARK: - Realmデータベース
-    func searchPlayingData(title: String, artist: String) -> PlayingData?{
+    func searchPlayingDataItem(title: String, artist: String) -> PlayingDataItem?{
         //Realmからデータを取得
-        let history = realm.objects(PlayingData.self).filter("title == %@ && artist == %@", title, artist)
+        let history = realm.objects(PlayingDataItem.self).filter("title == %@ && artist == %@", title, artist)
         
         if history.count > 0 {
             return history.first
