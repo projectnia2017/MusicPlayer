@@ -22,11 +22,16 @@ class AlbumItem {
     var id: Int = 0
     var title: String = ""
     var artist: String = ""
+    var dateAdded: Date? = nil
+    var yearAddedString: String = ""
     var artwork: MPMediaItemArtwork? = nil
 }
 
 class SongItem {
     var id: Int = 0
+    var mediaItem: MPMediaItem? = nil
+    
+    //MPMediaItemから取得
     var title: String {
         get{
             return (mediaItem?.title)!
@@ -47,16 +52,25 @@ class SongItem {
             return (mediaItem?.albumTrackNumber)!
         }
     }
-    var duration: String = ""
+    var dateAdded: Date {
+        get{
+            return (mediaItem?.dateAdded)!
+        }
+    }
     var artwork: MPMediaItemArtwork? {
         get{
             return self.mediaItem?.artwork
         }
     }
-    var mediaItem: MPMediaItem? = nil
     
-    //独自データ
+    //MPMediaItemから加工
+    var duration: String = ""
+    var dateAddedString: String = ""
+    var yearAddedString: String = ""
+
+    //独自の再生情報データ
     var lastPlayingDate: Date? =  nil
+    var lastPlayingDateString: String =  ""
     var playCount: Int = 0
     var skipCount: Int = 0
 }
@@ -68,8 +82,4 @@ class PlayingDataItem: Object {
     @objc dynamic var lastPlayingDate: Date? = nil
     @objc dynamic var playCount: Int = 0
     @objc dynamic var skipCount: Int = 0
-    
-    override static func primaryKey() -> String {
-        return "title"
-    }
 }

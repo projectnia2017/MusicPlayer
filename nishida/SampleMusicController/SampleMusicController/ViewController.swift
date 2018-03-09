@@ -44,33 +44,37 @@ class ViewController: UIViewController {
     func load(){
         
         //プレイリスト一覧の取得
-        let playlists:Array<PlaylistItem> = musicDataController.getPlaylists(sortOrder: MusicDataController.SortOrder.ASCENDING)
+        let playlists:Array<PlaylistItem> = musicDataController.getPlaylists(sortType: MusicDataController.SortType.TITLE, sortOrder: MusicDataController.SortOrder.ASCENDING)
         for playlist:PlaylistItem in playlists{
-            print("\(playlist.id):\(playlist.title)")
+            //print("\(playlist.id):\(playlist.title)")
         }
         
         //アルバム一覧の取得
-        let albums:Array<AlbumItem> = musicDataController.getAlbums(sortOrder: MusicDataController.SortOrder.ASCENDING)
+        let albums:Array<AlbumItem> = musicDataController.getAlbums(sortType: MusicDataController.SortType.DATEADDED, sortOrder: MusicDataController.SortOrder.ASCENDING)
         for album:AlbumItem in albums{
-            //print("\(album.id):\(album.title):\(album.artist)")
+            //print("\(album.id):\(album.title)/\(album.artist)/\(album.dateAdded)")
         }
         
     }
 
     @IBAction func musicSet(_ sender: Any) {
         //プレイリスト内の曲の取得
-        let songs:Array<SongItem> = musicDataController.getSongsWithPlaylist(id: 4, sortType: MusicDataController.SortType.ARTIST, sortOrder: MusicDataController.SortOrder.ASCENDING)
+        let songs:Array<SongItem> = musicDataController.getSongsWithPlaylist(id: 4, sortType: MusicDataController.SortType.DEFAULT, sortOrder: MusicDataController.SortOrder.ASCENDING)
+        //let songs:Array<SongItem> = musicDataController.getSongsWithPlaylist(id: 0, sortType: MusicDataController.SortType.ARTIST, sortOrder: MusicDataController.SortOrder.ASCENDING)
         
         //アルバム内の曲の取得
-        //let songs:Array<SongItem> = musicDataController.getSongsWithAlbum(id: 60, sortType: MusicDataController.SortType.TRACKNUMBER, sortOrder: MusicDataController.SortOrder.ASCENDING)
+        //let songs:Array<SongItem> = musicDataController.getSongsWithAlbum(id: 0, sortType: MusicDataController.SortType.TRACKNUMBER, sortOrder: MusicDataController.SortOrder.ASCENDING)
+        
+        //全曲一覧の取得
+        //let songs:Array<SongItem> = musicDataController.getSongsWithAll(sortType: MusicDataController.SortType.ALBUM, sortOrder: MusicDataController.SortOrder.ASCENDING)
         
         for song:SongItem in songs{
-            print("\(song.id)/\(song.title)/\(song.artist)/\(song.albumTitle)/\(song.duration)/\(song.playCount)/\(song.skipCount)")
+            print("\(song.id):\(song.title)/\(song.artist)/\(song.albumTitle)/\(song.dateAddedString)/\(song.playCount)/\(song.skipCount)\(song.lastPlayingDateString)")
         }
         
         //ループ設定
-        musicController.setLoopMode(mode: MusicController.LoopMode.NOLOOP)
-        //musicController.setLoopMode(mode: MusicController.LoopMode.LOOP)
+        //musicController.setLoopMode(mode: MusicController.LoopMode.NOLOOP)
+        musicController.setLoopMode(mode: MusicController.LoopMode.LOOP)
         
         //リピート設定
         musicController.setRepeatMode(mode: MusicController.RepeatMode.NOREPEAT)

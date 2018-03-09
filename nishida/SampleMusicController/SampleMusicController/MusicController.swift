@@ -523,15 +523,33 @@ class MusicController: NSObject, AVAudioPlayerDelegate  {
     //MARK: - MPNowPlayingInfoCenter制御
     private func updateNowPlayingInfoCenter(){
         if self.playingMediaItem != nil {
-            self.nowPlayingInfoCenter.nowPlayingInfo = [
-                MPMediaItemPropertyTitle: self.playingMediaItem.title ?? "",
-                MPMediaItemPropertyAlbumTitle: self.playingMediaItem.albumTitle ?? "",
-                MPMediaItemPropertyArtist: self.playingMediaItem.artist ?? "",
-                MPMediaItemPropertyPlaybackDuration: self.player.duration,
-                MPMediaItemPropertyArtwork:self.playingMediaItem.artwork!,
-                MPNowPlayingInfoPropertyPlaybackRate: 1]
+            
+            if self.playingMediaItem.artwork != nil {
+                self.nowPlayingInfoCenter.nowPlayingInfo = [
+                    MPMediaItemPropertyTitle: self.playingMediaItem.title ?? "",
+                    MPMediaItemPropertyAlbumTitle: self.playingMediaItem.albumTitle ?? "",
+                    MPMediaItemPropertyArtist: self.playingMediaItem.artist ?? "",
+                    MPMediaItemPropertyPlaybackDuration: self.player.duration,
+                    MPMediaItemPropertyArtwork: self.playingMediaItem.artwork!,
+                    MPNowPlayingInfoPropertyPlaybackRate: 1]
+            } else {
+                self.nowPlayingInfoCenter.nowPlayingInfo = [
+                    MPMediaItemPropertyTitle: self.playingMediaItem.title ?? "",
+                    MPMediaItemPropertyAlbumTitle: self.playingMediaItem.albumTitle ?? "",
+                    MPMediaItemPropertyArtist: self.playingMediaItem.artist ?? "",
+                    MPMediaItemPropertyPlaybackDuration: self.player.duration,
+                    MPNowPlayingInfoPropertyPlaybackRate: 1]
+            }
+            
         } else{
             self.nowPlayingInfoCenter.nowPlayingInfo = nil
+        }
+    }
+    private func getArtwork(mediaItem: MPMediaItem) -> MPMediaItemArtwork? {
+        if mediaItem.artwork != nil {
+            return self.playingMediaItem.artwork
+        } else {
+            return nil
         }
     }
     
@@ -562,8 +580,8 @@ class MusicController: NSObject, AVAudioPlayerDelegate  {
         let title: String = self.playingMediaItem.title!
         let artist: String = self.playingMediaItem.artist!
         let now = Date()
-        let history = realm.objects(PlayingDataItem.self).filter("title == %@ && artist == %@", title, artist)
         
+        let history = realm.objects(PlayingDataItem.self).filter("title == %@ && artist == %@", title, artist)
         if history.count > 0 {
             autoreleasepool {
                 let PlayingDataItem = history.first
