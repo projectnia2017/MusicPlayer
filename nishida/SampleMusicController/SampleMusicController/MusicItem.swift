@@ -16,6 +16,10 @@ class PlaylistItem {
     var id: Int = 0
     var title: String = ""
     var artwork: MPMediaItemArtwork? = nil
+    
+    //独自の再生情報データ
+    var lastPlayingDate: Date? =  nil
+    var lastPlayingDateString: String =  ""
 }
 
 class AlbumItem {
@@ -25,6 +29,13 @@ class AlbumItem {
     var dateAdded: Date? = nil
     var yearAddedString: String = ""
     var artwork: MPMediaItemArtwork? = nil
+    
+    //独自の再生情報データ
+    var lastPlayingDate: Date? =  nil
+    var lastPlayingDateString: String =  ""
+    
+    //全曲リストでの表示・非表示
+    var visible: Bool = true
 }
 
 class SongItem {
@@ -76,6 +87,17 @@ class SongItem {
 }
 
 //MARK: - Realm
+class PlaylistDataItem: Object {
+    @objc dynamic var title: String = ""
+    @objc dynamic var lastPlayingDate: Date? = nil
+    @objc dynamic var visible: Bool = true
+}
+class AlbumDataItem: Object {
+    @objc dynamic var title: String = ""
+    @objc dynamic var artist: String = ""
+    @objc dynamic var lastPlayingDate: Date? = nil
+    @objc dynamic var visible: Bool = true
+}
 class PlayingDataItem: Object {
     @objc dynamic var title: String = ""
     @objc dynamic var artist: String = ""

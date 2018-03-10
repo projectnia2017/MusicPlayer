@@ -15,6 +15,12 @@ class MusicDataController: NSObject, AVAudioPlayerDelegate  {
     //シングルトン
     static var shared: MusicDataController = MusicDataController()
     
+    //MARK: - 構造体
+    struct Rating {
+        var id:Int
+        var rate:Int
+    }
+
     //MARK: - 定義
     //定数
     public enum SortType {
@@ -33,25 +39,26 @@ class MusicDataController: NSObject, AVAudioPlayerDelegate  {
         case DESCENDING
     }
     
-    //ソート順
+    //MARK: - publicプロパティ
+    //選択可能なソート方法
     let SortTypeListPlaylist:Array<SortType> = [SortType.TITLE, SortType.DATEADDED]
     let SortTypeListAlbum:Array<SortType> = [SortType.TITLE, SortType.ARTIST]
     let SortTypeListArtist:Array<SortType> = [SortType.ARTIST]
     let SortTypeListSong:Array<SortType> = [SortType.TITLE, SortType.SHUFFLE, SortType.ARTIST, SortType.ALBUM, SortType.DATEADDED]
     let SortTypeListHistory:Array<SortType> = [SortType.LASTPLAYINGDATE]
     
-    //MARK: - publicプロパティ
-    //状態
-    var currentSortType:SortType = SortType.DEFAULT
-    var currentSortOrder:SortOrder = SortOrder.ASCENDING
+    var reShuffleCount = 1
+    var maxShuffleCount = 10
     
     //MARK: - privateプロパティ
-    private let realm: Realm
     
     //MARK: - 初期化
     private override init(){
         
-        self.realm = try! Realm()
+        //UserDefaultsから取得
+        if UserDefaults.standard.object(forKey: "maxShuffleCount") != nil {
+            self.maxShuffleCount = UserDefaults.standard.integer(forKey: "maxShuffleCount")
+        }
         
         super.init()
     }
@@ -60,7 +67,7 @@ class MusicDataController: NSObject, AVAudioPlayerDelegate  {
     //プレイリスト情報
     func getPlaylists(sortType:SortType = SortType.DEFAULT, sortOrder:SortOrder = SortOrder.ASCENDING) -> Array<PlaylistItem> {
         
-        self.currentSortOrder = sortOrder
+        let formatter = DateFormatter()
         
         //クエリー取得
         let playlistQuery = MPMediaQuery.playlists()
@@ -82,6 +89,17 @@ class MusicDataController: NSObject, AVAudioPlayerDelegate  {
                 if mediaItem.artwork != nil {
                     item.artwork = mediaItem.artwork
                     break;
+                }
+            }
+            
+            //Realmデータベースから再生・表示情報を取得
+            let playlistDataItem:PlaylistDataItem? = searchPlaylistDataItem(title: item.title)
+            if playlistDataItem != nil {
+                if playlistDataItem?.lastPlayingDate != nil {
+                    item.lastPlayingDate = (playlistDataItem?.lastPlayingDate)!
+                    
+                    formatter.dateFormat = "yyyy/MM/dd"
+                    item.lastPlayingDateString = formatter.string(from: item.lastPlayingDate!)
                 }
             }
             
@@ -111,27 +129,10 @@ class MusicDataController: NSObject, AVAudioPlayerDelegate  {
         
         return playlists
     }
-    //プレイリスト内の曲リスト
-    func getSongsWithPlaylist(id: Int,
-                              sortType:SortType = SortType.DEFAULT,
-                              sortOrder:SortOrder = SortOrder.ASCENDING) -> Array<SongItem>{
-        
-        //クエリー取得
-        let playlistQuery = MPMediaQuery.playlists()
-        playlistQuery.addFilterPredicate(MPMediaPropertyPredicate(value: false, forProperty: MPMediaItemPropertyIsCloudItem))
-        let playlistCollections = playlistQuery.collections
-        let playlist:MPMediaItemCollection = playlistCollections![id]
-        
-        //曲リスト作成
-        let songList:Array<SongItem> = createSongList(collection: playlist)
-        
-        //ソート
-        let sortedList:Array<SongItem> = sortSongList(songList: songList, sortType: sortType, sortOrder: sortOrder)
-        
-        return sortedList
-    }
     //アルバム情報
     func getAlbums(sortType:SortType = SortType.DEFAULT, sortOrder:SortOrder = SortOrder.ASCENDING) -> Array<AlbumItem>{
+        
+        let formatter = DateFormatter()
         
         //クエリー取得
         let albumQuery = MPMediaQuery.albums()
@@ -155,13 +156,25 @@ class MusicDataController: NSObject, AVAudioPlayerDelegate  {
             if album.representativeItem?.dateAdded != nil {
                 item.dateAdded = album.representativeItem?.dateAdded
                 
-                let formatter = DateFormatter()
                 formatter.dateFormat = "yyyy"
                 item.yearAddedString = formatter.string(from: item.dateAdded!)
             }
             
             if album.representativeItem?.artwork != nil {
                 item.artwork = album.representativeItem?.artwork
+            }
+            
+            //Realmデータベースから再生・表示情報を取得
+            let albumDataItem:AlbumDataItem? = searchAlbumDataItem(title: item.title, artist: item.artist)
+            if albumDataItem != nil {
+                if albumDataItem?.lastPlayingDate != nil {
+                    item.lastPlayingDate = (albumDataItem?.lastPlayingDate) ?? nil
+
+                    formatter.dateFormat = "yyyy/MM/dd"
+                    item.lastPlayingDateString = formatter.string(from: item.lastPlayingDate!)
+                }
+                
+                item.visible = (albumDataItem?.visible)!
             }
             
             albums.append(item)
@@ -197,11 +210,28 @@ class MusicDataController: NSObject, AVAudioPlayerDelegate  {
         
         return albums
     }
+    //プレイリスト内の曲リスト
+    func getSongsWithPlaylist(id: Int,
+                              sortType:SortType = SortType.DEFAULT,
+                              sortOrder:SortOrder = SortOrder.ASCENDING) -> Array<SongItem>{
+        //クエリー取得
+        let playlistQuery = MPMediaQuery.playlists()
+        playlistQuery.addFilterPredicate(MPMediaPropertyPredicate(value: false, forProperty: MPMediaItemPropertyIsCloudItem))
+        let playlistCollections = playlistQuery.collections
+        let playlist:MPMediaItemCollection = playlistCollections![id]
+        
+        //曲リスト作成
+        let songList:Array<SongItem> = createSongList(collection: playlist)
+        
+        //ソート
+        let sortedList:Array<SongItem> = sortSongList(songList: songList, sortType: sortType, sortOrder: sortOrder)
+        
+        return sortedList
+    }
     //アルバム内の曲リスト
     func getSongsWithAlbum(id: Int,
                            sortType:SortType = SortType.DEFAULT,
                            sortOrder:SortOrder = SortOrder.ASCENDING) -> Array<SongItem>{
-
         //クエリー取得
         let albumQuery = MPMediaQuery.albums()
         albumQuery.addFilterPredicate(MPMediaPropertyPredicate(value: false, forProperty: MPMediaItemPropertyIsCloudItem))
@@ -216,19 +246,20 @@ class MusicDataController: NSObject, AVAudioPlayerDelegate  {
         
         return sortedList
     }
-    //全曲
+    //全曲リスト
     func getSongsWithAll(sortType:SortType = SortType.DEFAULT,
                          sortOrder:SortOrder = SortOrder.ASCENDING) -> Array<SongItem>{
-        
         //クエリー取得
         let albumQuery = MPMediaQuery.albums()
         albumQuery.addFilterPredicate(MPMediaPropertyPredicate(value: false, forProperty: MPMediaItemPropertyIsCloudItem))
         let albumCollections = albumQuery.collections
         
+        let filterdAlbumDataItems: Results<AlbumDataItem>? = getFilterdAlbumDataItems()
+        
         var songList:Array<SongItem> = []
         
         for album in albumCollections! {
-            songList += createSongList(collection: album, startId: songList.count)
+            songList += createSongList(collection: album, startId: songList.count, filteredAlbumDataItems: filterdAlbumDataItems)
         }
         
         //ソート
@@ -236,17 +267,39 @@ class MusicDataController: NSObject, AVAudioPlayerDelegate  {
         
         return sortedList
     }
+    //シャッフル
+    func reShuffle() {
+        self.reShuffleCount += 1
+        if self.reShuffleCount > self.maxShuffleCount{
+            self.maxShuffleCount = self.reShuffleCount
+            
+            //UserDefaultsに保存
+            UserDefaults.standard.set(self.maxShuffleCount , forKey: "maxShuffleCount")
+        }
+    }
     
     //MARK: - 共通
     //曲リスト作成
-    private func createSongList(collection: MPMediaItemCollection, startId: Int = 0) -> Array<SongItem>{
+    private func createSongList(collection: MPMediaItemCollection,
+                                startId: Int = 0,
+                                filteredAlbumDataItems: Results<AlbumDataItem>? = nil ) -> Array<SongItem>{
+        
+        let formatter = DateFormatter()
         
         var songList:Array<SongItem> = []
         
         var songId: Int = startId
-        for song in collection.items {
+        
+        for_i: for song in collection.items {
             
-            let formatter = DateFormatter()
+            //フィルタリング
+            if filteredAlbumDataItems != nil {
+                for_j: for filter in filteredAlbumDataItems! {
+                    if song.albumTitle == filter.title && song.artist == filter.artist {
+                        break for_i
+                    }
+                }
+            }
             
             let item = SongItem()
             item.id = songId
@@ -265,15 +318,22 @@ class MusicDataController: NSObject, AVAudioPlayerDelegate  {
             item.yearAddedString = formatter.string(from: item.dateAdded)
             
             //Realmデータベースから再生情報を取得
-            let PlayingDataItem:PlayingDataItem? = searchPlayingDataItem(title: item.title, artist: item.artist)
-            if PlayingDataItem != nil {
+            let playingDataItem:PlayingDataItem? = searchPlayingDataItem(title: item.title, artist: item.artist)
+            if playingDataItem != nil {
                 //最終再生日時
-                item.lastPlayingDate = (PlayingDataItem?.lastPlayingDate)!
+                item.lastPlayingDate = (playingDataItem?.lastPlayingDate)!
+                
                 formatter.dateFormat = "yyyy/MM/dd"
                 item.lastPlayingDateString = formatter.string(from: item.lastPlayingDate!)
                 
-                item.playCount = (PlayingDataItem?.playCount)!
-                item.skipCount = (PlayingDataItem?.skipCount)!
+                item.playCount = (playingDataItem?.playCount)!
+                item.skipCount = (playingDataItem?.skipCount)!
+            } else {
+                item.lastPlayingDate = Date()
+                formatter.dateFormat = "yyyy/MM/dd"
+                item.lastPlayingDateString = formatter.string(from: item.lastPlayingDate!)
+                item.playCount = 0
+                item.skipCount = 0
             }
             
             songList.append(item)
@@ -286,6 +346,10 @@ class MusicDataController: NSObject, AVAudioPlayerDelegate  {
     private func sortSongList(songList: Array<SongItem>,
                               sortType:SortType = SortType.DEFAULT,
                               sortOrder:SortOrder = SortOrder.ASCENDING) -> Array<SongItem>{
+        //シャッフルではなかった場合、シャッフルカウントをリセット
+        if sortType != SortType.SHUFFLE {
+            self.reShuffleCount = 1
+        }
         
         var sortedList:Array<SongItem> = []
         
@@ -298,10 +362,47 @@ class MusicDataController: NSObject, AVAudioPlayerDelegate  {
             }
             break
         case .SHUFFLE:
+            let randomRate: Float = Float(songList.count) / 1.1
+            var shuffleEffectCount: Int = self.reShuffleCount
+            var ratings: Array<Rating> = []
             
+            //レートを設定（再生回数-スキップ回数）
+            for song in songList {
+                var rate = song.playCount - song.skipCount
+                if rate < 0 {
+                    rate = 0
+                }
+                ratings.append(Rating(id: song.id, rate: rate))
+            }
             
+            //レート順にソート
+            ratings.sort(by: {$0.rate > $1.rate})
             
+            //シャッフル
+            var ratingResults: Array<Rating> = []
+            var indexes = (0 ..< ratings.count).map { $0 }
+            while indexes.count > 0 {
+                //シャフル回数による影響
+                let effect = Float(self.maxShuffleCount - shuffleEffectCount) / Float(self.maxShuffleCount) * randomRate
+                
+                var indexOfIndexes = Int(arc4random_uniform(UInt32(indexes.count))) - Int(effect)
+                if indexOfIndexes < 0{
+                    indexOfIndexes = 0
+                }
+                
+                let index = indexes[indexOfIndexes]
+                ratingResults.append(ratings[index])
+                indexes.remove(at: indexOfIndexes)
+                
+                //シャッフル回数による影響を減少
+                if shuffleEffectCount < maxShuffleCount-1 {
+                    shuffleEffectCount += 1
+                }
+            }
             
+            for item in ratingResults {
+                sortedList.append(songList[item.id])
+            }
             
             break
         case .TITLE:
@@ -371,15 +472,66 @@ class MusicDataController: NSObject, AVAudioPlayerDelegate  {
     }
     
     //MARK: - Realmデータベース
-    func searchPlayingDataItem(title: String, artist: String) -> PlayingDataItem?{
-        //Realmからデータを取得
-        let history = realm.objects(PlayingDataItem.self).filter("title == %@ && artist == %@", title, artist)
+    //データ
+    private func searchPlaylistDataItem(title: String) -> PlaylistDataItem?{
+        let realm = try! Realm()
+        let items = realm.objects(PlaylistDataItem.self).filter("title == %@", title)
         
-        if history.count > 0 {
-            return history.first
+        if items.count > 0 {
+            return items.first
+        } else {
+            return nil
+        }
+    }
+    private func searchAlbumDataItem(title: String, artist: String) -> AlbumDataItem?{
+        let realm = try! Realm()
+        let items = realm.objects(AlbumDataItem.self).filter("title == %@ && artist == %@", title, artist)
+        
+        if items.count > 0 {
+            return items.first
+        } else {
+            return nil
+        }
+    }
+    private func searchPlayingDataItem(title: String, artist: String) -> PlayingDataItem?{
+        let realm = try! Realm()
+        let items = realm.objects(PlayingDataItem.self).filter("title == %@ && artist == %@", title, artist)
+        
+        if items.count > 0 {
+            return items.first
+        } else {
+            return nil
+        }
+    }
+    
+    //アルバムフィルターデータ
+    func setFilterdAlbumDataItem(title: String, artist: String, visible:Bool ) {
+        let realm = try! Realm()
+        let items = realm.objects(AlbumDataItem.self).filter("title == %@ && artist == %@", title, artist)
+        
+        if items.count > 0 {
+            autoreleasepool {
+                let AlbumDataItem = items.first
+                try! realm.write {
+                    AlbumDataItem?.visible = visible
+                }
+            }
+        } else {
+            autoreleasepool {
+                try! realm.write {
+                    realm.add(AlbumDataItem(value: ["title": title, "artist": artist, "visible": visible]))
+                }
+            }
+        }
+    }
+    private func getFilterdAlbumDataItems() -> Results<AlbumDataItem>?{
+        let realm = try! Realm()
+        let items = realm.objects(AlbumDataItem.self).filter("visible == %d", false)
+        
+        if items.count > 0 {
+            return items
         } else {
             return nil
         }
     }
 }
-

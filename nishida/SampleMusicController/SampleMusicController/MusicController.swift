@@ -71,8 +71,6 @@ class MusicController: NSObject, AVAudioPlayerDelegate  {
     private let notificationCenter: NotificationCenter
     private var changeArtworkIntervalTimer: Timer?
     
-    private let realm: Realm
-    
     //MARK: - 初期化
     private override init(){
         
@@ -92,21 +90,12 @@ class MusicController: NSObject, AVAudioPlayerDelegate  {
         try! self.audioSession.setCategory(AVAudioSessionCategoryPlayback)
         try! self.audioSession.setActive(true)
         
-        self.realm = try! Realm()
-        
         super.init()
         
         self.configureCommandCenter()
-        
     }
     
     //MARK: - 状態取得
-    func hasQue() -> Bool {
-        if self.playingList != nil {
-            return true
-        }
-        return false
-    }
     func isPlaying() -> Bool {
         if self.currentStatus == PlayerStatus.PLAY {
             return true
@@ -129,6 +118,10 @@ class MusicController: NSObject, AVAudioPlayerDelegate  {
     //MARK: - プレイヤーセットアップ
     //曲のセット：リストデータと開始番号
     func setPlayer(list: Array<SongItem>, playId: Int = 0){
+        
+        if list.count <= 0 {
+            return
+        }
         
         self.playingList = list
         self.playingNumber = playId;
@@ -256,9 +249,11 @@ class MusicController: NSObject, AVAudioPlayerDelegate  {
     func next(auto: Bool = false) {
         if self.player != nil {
             
-            //スキップカウントの書き込み
+            //50%の位置より前でスキップした場合にスキップカウントを書き込み
             if auto == false {
-                writeSkipData()
+                if self.player.currentTime < (self.player.duration / 2) {
+                    writeSkipCountData()
+                }
             }
             
             //各モードでの動作
@@ -361,9 +356,11 @@ class MusicController: NSObject, AVAudioPlayerDelegate  {
                 return
             }
             
-            //スキップカウントの書き込み
+            //50%の位置より前でスキップした場合にスキップカウントを書き込み
             if auto == false {
-                writeSkipData()
+                if self.player.currentTime < (self.player.duration / 2) {
+                    writeSkipCountData()
+                }
             }
             
             //各モードでの動作
@@ -511,7 +508,6 @@ class MusicController: NSObject, AVAudioPlayerDelegate  {
                     
                 }
             }
-            
         } else{
             self.commandCenter.playCommand.isEnabled = false
             self.commandCenter.pauseCommand.isEnabled = false
@@ -523,7 +519,6 @@ class MusicController: NSObject, AVAudioPlayerDelegate  {
     //MARK: - MPNowPlayingInfoCenter制御
     private func updateNowPlayingInfoCenter(){
         if self.playingMediaItem != nil {
-            
             if self.playingMediaItem.artwork != nil {
                 self.nowPlayingInfoCenter.nowPlayingInfo = [
                     MPMediaItemPropertyTitle: self.playingMediaItem.title ?? "",
@@ -575,8 +570,9 @@ class MusicController: NSObject, AVAudioPlayerDelegate  {
     }
     
     //MARK: - Realmデータベース
-    func writePlayingDataItem() {
+    private func writePlayingDataItem() {
         //Realmへ書き込み
+        let realm = try! Realm()
         let title: String = self.playingMediaItem.title!
         let artist: String = self.playingMediaItem.artist!
         let now = Date()
@@ -598,8 +594,9 @@ class MusicController: NSObject, AVAudioPlayerDelegate  {
             }
         }
     }
-    func writeSkipData() {
+    private func writeSkipCountData() {
         //Realmへ書き込み
+        let realm = try! Realm()
         let title: String = self.playingMediaItem.title!
         let artist: String = self.playingMediaItem.artist!
         let now = Date()

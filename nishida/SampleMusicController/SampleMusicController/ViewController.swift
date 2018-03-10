@@ -15,6 +15,9 @@ class ViewController: UIViewController {
     let musicDataController = MusicDataController.shared
     let musicController = MusicController.shared
     
+    //システムボリューム用
+    var volumeSlider: UISlider!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
@@ -27,6 +30,19 @@ class ViewController: UIViewController {
                 print("not authorization")
             }
         }
+        
+        //システムボリュームはMPVolumeViewのスライダーを表示し、値を保存する
+        let mpVolumeView = MPVolumeView(frame: self.view.bounds)
+        mpVolumeView.isHidden = true;
+        self.view.addSubview(mpVolumeView)
+        // 音量調整用のスライダーを取得
+        for childView in mpVolumeView.subviews {
+            if ((childView as? UISlider) != nil) {
+            // UISliderクラスで探索
+            self.volumeSlider = childView as! UISlider
+            }
+        }
+        self.volumeSlider.setValue(0.2, animated: false)
         
         //通知の有効化
 //        let notificationCenter = NotificationCenter.default
@@ -44,9 +60,9 @@ class ViewController: UIViewController {
     func load(){
         
         //プレイリスト一覧の取得
-        let playlists:Array<PlaylistItem> = musicDataController.getPlaylists(sortType: MusicDataController.SortType.TITLE, sortOrder: MusicDataController.SortOrder.ASCENDING)
+        let playlists:Array<PlaylistItem> = musicDataController.getPlaylists(sortType: MusicDataController.SortType.DEFAULT, sortOrder: MusicDataController.SortOrder.ASCENDING)
         for playlist:PlaylistItem in playlists{
-            //print("\(playlist.id):\(playlist.title)")
+            print("\(playlist.id):\(playlist.title)")
         }
         
         //アルバム一覧の取得
@@ -55,12 +71,22 @@ class ViewController: UIViewController {
             //print("\(album.id):\(album.title)/\(album.artist)/\(album.dateAdded)")
         }
         
+        //全曲リストでフィルタリングするアルバムを登録
+        musicDataController.setFilterdAlbumDataItem(title: "Toeic", artist: "Grammar", visible: false)
+        musicDataController.setFilterdAlbumDataItem(title: "速読速聴・英単語 TOEIC(R) TEST STANDARD 1800 [Disc 1]", artist: "Z会", visible: false)
+        musicDataController.setFilterdAlbumDataItem(title: "速読速聴・英単語 TOEIC(R) TEST STANDARD 1800 [Disc 2]", artist: "Z会", visible: false)
+        musicDataController.setFilterdAlbumDataItem(title: "TOEIC Testに必要な文法‣単語・熟語が同時に身につく本", artist: "かんき出版", visible: false)
     }
 
     @IBAction func musicSet(_ sender: Any) {
+
+        print("SHUFFLE")
+        musicDataController.reShuffle()
+
         //プレイリスト内の曲の取得
-        let songs:Array<SongItem> = musicDataController.getSongsWithPlaylist(id: 4, sortType: MusicDataController.SortType.DEFAULT, sortOrder: MusicDataController.SortOrder.ASCENDING)
         //let songs:Array<SongItem> = musicDataController.getSongsWithPlaylist(id: 0, sortType: MusicDataController.SortType.ARTIST, sortOrder: MusicDataController.SortOrder.ASCENDING)
+        //let songs:Array<SongItem> = musicDataController.getSongsWithPlaylist(id: 4, sortType: MusicDataController.SortType.DEFAULT, sortOrder: MusicDataController.SortOrder.ASCENDING)
+        let songs:Array<SongItem> = musicDataController.getSongsWithPlaylist(id: 4, sortType: MusicDataController.SortType.SHUFFLE)
         
         //アルバム内の曲の取得
         //let songs:Array<SongItem> = musicDataController.getSongsWithAlbum(id: 0, sortType: MusicDataController.SortType.TRACKNUMBER, sortOrder: MusicDataController.SortOrder.ASCENDING)
