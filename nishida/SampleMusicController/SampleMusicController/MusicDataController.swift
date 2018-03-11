@@ -44,7 +44,8 @@ class MusicDataController: NSObject, AVAudioPlayerDelegate  {
     let SortTypeListPlaylist:Array<SortType> = [SortType.TITLE, SortType.DATEADDED]
     let SortTypeListAlbum:Array<SortType> = [SortType.TITLE, SortType.ARTIST]
     let SortTypeListArtist:Array<SortType> = [SortType.ARTIST]
-    let SortTypeListSong:Array<SortType> = [SortType.TITLE, SortType.SHUFFLE, SortType.ARTIST, SortType.ALBUM, SortType.DATEADDED]
+    //let SortTypeListSong:Array<SortType> = [SortType.TITLE, SortType.SHUFFLE, SortType.ARTIST, SortType.ALBUM, SortType.DATEADDED]
+    let SortTypeListSong:Array<SortType> = [SortType.DEFAULT, SortType.TITLE, SortType.PLAYCOUNT, SortType.DATEADDED, SortType.SHUFFLE]
     let SortTypeListHistory:Array<SortType> = [SortType.LASTPLAYINGDATE]
     
     var reShuffleCount = 1
@@ -64,7 +65,12 @@ class MusicDataController: NSObject, AVAudioPlayerDelegate  {
     }
     
     //MARK: - 音楽情報取得
-    //プレイリスト情報
+    /**
+     プレイリストの一覧を取得
+     - parameter sortType: ソート方法
+     - parameter sortOrder: ソート順
+     - returns: PlaylistItemの配列
+     */
     func getPlaylists(sortType:SortType = SortType.DEFAULT, sortOrder:SortOrder = SortOrder.ASCENDING) -> Array<PlaylistItem> {
         
         let formatter = DateFormatter()
@@ -84,6 +90,10 @@ class MusicDataController: NSObject, AVAudioPlayerDelegate  {
             let item = PlaylistItem()
             item.id = playlistId
             item.title = playlistName as! String
+            
+            item.titleForSort = item.title
+            item.titleForSort = item.titleForSort.replacingOccurrences(of: "[\\p{S}]", with: "0", options: NSString.CompareOptions.regularExpression, range: nil)
+            item.titleForSort = item.titleForSort.replacingOccurrences(of: "\"", with: "", options: NSString.CompareOptions.regularExpression, range: nil)
             
             for mediaItem in playlist.items {
                 if mediaItem.artwork != nil {
@@ -118,9 +128,9 @@ class MusicDataController: NSObject, AVAudioPlayerDelegate  {
             break
         case .TITLE:
             if sortOrder == SortOrder.ASCENDING {
-                playlists.sort(by: {$0.title < $1.title})
+                playlists.sort(by: {$0.titleForSort < $1.titleForSort})
             }else{
-                playlists.sort(by: {$0.title > $1.title})
+                playlists.sort(by: {$0.titleForSort > $1.titleForSort})
             }
             break
         default:
@@ -129,7 +139,12 @@ class MusicDataController: NSObject, AVAudioPlayerDelegate  {
         
         return playlists
     }
-    //アルバム情報
+    /**
+     アルバムの一覧を取得
+     - parameter sortType: ソート方法
+     - parameter sortOrder: ソート順
+     - returns: AlbumItemの配列
+     */
     func getAlbums(sortType:SortType = SortType.DEFAULT, sortOrder:SortOrder = SortOrder.ASCENDING) -> Array<AlbumItem>{
         
         let formatter = DateFormatter()
@@ -210,7 +225,13 @@ class MusicDataController: NSObject, AVAudioPlayerDelegate  {
         
         return albums
     }
-    //プレイリスト内の曲リスト
+    /**
+     idで指定したプレイリスト内の曲の一覧を取得
+     - parameter id: プレイリストID
+     - parameter sortType: ソート方法
+     - parameter sortOrder: ソート順
+     - returns: SongItemの配列
+     */
     func getSongsWithPlaylist(id: Int,
                               sortType:SortType = SortType.DEFAULT,
                               sortOrder:SortOrder = SortOrder.ASCENDING) -> Array<SongItem>{
@@ -228,7 +249,13 @@ class MusicDataController: NSObject, AVAudioPlayerDelegate  {
         
         return sortedList
     }
-    //アルバム内の曲リスト
+    /**
+     idで指定したアルバム内の曲の一覧を取得
+     - parameter id: プレイリストID
+     - parameter sortType: ソート方法
+     - parameter sortOrder: ソート順
+     - returns: SongItemの配列
+     */
     func getSongsWithAlbum(id: Int,
                            sortType:SortType = SortType.DEFAULT,
                            sortOrder:SortOrder = SortOrder.ASCENDING) -> Array<SongItem>{
@@ -246,7 +273,12 @@ class MusicDataController: NSObject, AVAudioPlayerDelegate  {
         
         return sortedList
     }
-    //全曲リスト
+    /**
+     全曲の一覧を取得
+     - parameter sortType: ソート方法
+     - parameter sortOrder: ソート順
+     - returns: SongItemの配列
+     */
     func getSongsWithAll(sortType:SortType = SortType.DEFAULT,
                          sortOrder:SortOrder = SortOrder.ASCENDING) -> Array<SongItem>{
         //クエリー取得
@@ -267,7 +299,9 @@ class MusicDataController: NSObject, AVAudioPlayerDelegate  {
         
         return sortedList
     }
-    //シャッフル
+    /**
+     再度シャッフルを実行
+     */
     func reShuffle() {
         self.reShuffleCount += 1
         if self.reShuffleCount > self.maxShuffleCount{
@@ -304,6 +338,11 @@ class MusicDataController: NSObject, AVAudioPlayerDelegate  {
             let item = SongItem()
             item.id = songId
             item.mediaItem = song
+            
+            //ソート用に全角記号と"を無視
+            item.titleForSort = item.title
+            item.titleForSort = item.titleForSort.replacingOccurrences(of: "[\\p{S}]", with: "0", options: NSString.CompareOptions.regularExpression, range: nil)
+            item.titleForSort = item.titleForSort.replacingOccurrences(of: "\"", with: "", options: NSString.CompareOptions.regularExpression, range: nil)
             
             //曲の時間
             let minutes = Int(round(song.playbackDuration) / 60)
@@ -407,9 +446,9 @@ class MusicDataController: NSObject, AVAudioPlayerDelegate  {
             break
         case .TITLE:
             if sortOrder == SortOrder.ASCENDING {
-                sortedList = songList.sorted(by: {$0.title < $1.title})
+                sortedList = songList.sorted(by: {$0.titleForSort < $1.titleForSort})
             }else{
-                sortedList = songList.sorted(by: {$0.title > $1.title})
+                sortedList = songList.sorted(by: {$0.titleForSort > $1.titleForSort})
             }
             break
         case .ARTIST:
@@ -505,6 +544,12 @@ class MusicDataController: NSObject, AVAudioPlayerDelegate  {
     }
     
     //アルバムフィルターデータ
+    /**
+     全曲の一覧から除外するアルバムを設定
+     - parameter title: アルバム名
+     - parameter artist: アーティスト
+     - parameter visible: 表示/非表示
+     */
     func setFilterdAlbumDataItem(title: String, artist: String, visible:Bool ) {
         let realm = try! Realm()
         let items = realm.objects(AlbumDataItem.self).filter("title == %@ && artist == %@", title, artist)

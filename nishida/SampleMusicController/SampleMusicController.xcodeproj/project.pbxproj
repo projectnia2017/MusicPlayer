@@ -11,6 +11,7 @@
 		C0176CB720516DF800994346 /* RealmSwift.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C0176CB620516DF800994346 /* RealmSwift.framework */; };
 		C0176CB92051739100994346 /* RealmSwift.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = C0176CB620516DF800994346 /* RealmSwift.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		C0176CBA2051739400994346 /* Realm.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = C0176CB420516DEA00994346 /* Realm.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		C0176CC12054D86B00994346 /* CustomUISegmentedControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0176CC02054D86B00994346 /* CustomUISegmentedControl.swift */; };
 		C08B7D18204A44F600D777B7 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = C08B7D17204A44F600D777B7 /* AppDelegate.swift */; };
 		C08B7D1A204A44F600D777B7 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C08B7D19204A44F600D777B7 /* ViewController.swift */; };
 		C08B7D1D204A44F600D777B7 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C08B7D1B204A44F600D777B7 /* Main.storyboard */; };
@@ -67,6 +68,7 @@
 /* Begin PBXFileReference section */
 		C0176CB420516DEA00994346 /* Realm.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Realm.framework; path = "SampleMusicController/Realm/swift-4.0.2/Realm.framework"; sourceTree = "<group>"; };
 		C0176CB620516DF800994346 /* RealmSwift.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = RealmSwift.framework; path = "SampleMusicController/Realm/swift-4.0.2/RealmSwift.framework"; sourceTree = "<group>"; };
+		C0176CC02054D86B00994346 /* CustomUISegmentedControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomUISegmentedControl.swift; sourceTree = "<group>"; };
 		C08B7D14204A44F600D777B7 /* SampleMusicController.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SampleMusicController.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C08B7D17204A44F600D777B7 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		C08B7D19204A44F600D777B7 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -147,6 +149,7 @@
 			children = (
 				C08B7D17204A44F600D777B7 /* AppDelegate.swift */,
 				C08B7D19204A44F600D777B7 /* ViewController.swift */,
+				C0176CC02054D86B00994346 /* CustomUISegmentedControl.swift */,
 				C08B7D49204CCA3300D777B7 /* MusicItem.swift */,
 				C08B7D47204CC66700D777B7 /* MusicDataController.swift */,
 				C08B7D45204A456F00D777B7 /* MusicController.swift */,
@@ -318,6 +321,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				C08B7D4A204CCA3300D777B7 /* MusicItem.swift in Sources */,
+				C0176CC12054D86B00994346 /* CustomUISegmentedControl.swift in Sources */,
 				C08B7D1A204A44F600D777B7 /* ViewController.swift in Sources */,
 				C08B7D18204A44F600D777B7 /* AppDelegate.swift in Sources */,
 				C08B7D46204A456F00D777B7 /* MusicController.swift in Sources */,

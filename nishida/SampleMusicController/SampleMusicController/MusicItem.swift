@@ -18,6 +18,7 @@ class PlaylistItem {
     var artwork: MPMediaItemArtwork? = nil
     
     //独自の再生情報データ
+    var titleForSort: String = ""
     var lastPlayingDate: Date? =  nil
     var lastPlayingDateString: String =  ""
 }
@@ -80,6 +81,7 @@ class SongItem {
     var yearAddedString: String = ""
 
     //独自の再生情報データ
+    var titleForSort: String = ""
     var lastPlayingDate: Date? =  nil
     var lastPlayingDateString: String =  ""
     var playCount: Int = 0

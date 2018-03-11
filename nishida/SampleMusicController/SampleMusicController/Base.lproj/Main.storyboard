@@ -9,6 +9,11 @@
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
+    <customFonts key="customFonts">
+        <array key="Avenir.ttc">
+            <string>Avenir-Book</string>
+        </array>
+    </customFonts>
     <scenes>
         <!--View Controller-->
         <scene sceneID="tne-QT-ifu">
@@ -18,61 +23,132 @@
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="3N0-oN-a4X">
-                                <rect key="frame" x="50" y="187" width="114" height="30"/>
+                            <pickerView contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Uzt-zY-6zh">
+                                <rect key="frame" x="0.0" y="52" width="375" height="162"/>
+                                <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxY="YES"/>
+                            </pickerView>
+                            <pickerView contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="chl-To-YAc">
+                                <rect key="frame" x="0.0" y="287" width="375" height="162"/>
+                                <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxY="YES"/>
+                            </pickerView>
+                            <toolbar opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="zVT-gv-noW">
+                                <rect key="frame" x="0.0" y="579" width="375" height="44"/>
+                                <items>
+                                    <barButtonItem systemItem="flexibleSpace" id="Dn7-zY-eQt"/>
+                                    <barButtonItem systemItem="play" id="6ey-fE-drk">
+                                        <connections>
+                                            <action selector="playMusic:" destination="BYZ-38-t0r" id="JSq-f7-krC"/>
+                                        </connections>
+                                    </barButtonItem>
+                                    <barButtonItem width="42" systemItem="fixedSpace" id="995-hg-TMc"/>
+                                    <barButtonItem systemItem="pause" id="lbe-Mx-KkU">
+                                        <connections>
+                                            <action selector="pauseMusic:" destination="BYZ-38-t0r" id="BUn-fG-zLf"/>
+                                        </connections>
+                                    </barButtonItem>
+                                    <barButtonItem width="42" systemItem="fixedSpace" id="5PL-tl-ulP"/>
+                                    <barButtonItem systemItem="rewind" id="cq5-O4-Pev">
+                                        <connections>
+                                            <action selector="prevMusic:" destination="BYZ-38-t0r" id="z1w-8d-723"/>
+                                        </connections>
+                                    </barButtonItem>
+                                    <barButtonItem width="42" systemItem="fixedSpace" id="Ghp-qJ-QXg"/>
+                                    <barButtonItem systemItem="fastForward" id="ddW-s3-Wzu">
+                                        <connections>
+                                            <action selector="nextMusic:" destination="BYZ-38-t0r" id="5OU-Eo-oCp"/>
+                                        </connections>
+                                    </barButtonItem>
+                                    <barButtonItem systemItem="flexibleSpace" id="i1K-lV-pxR"/>
+                                </items>
+                            </toolbar>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Playlist" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Ncw-rT-Ujq">
+                                <rect key="frame" x="160" y="40" width="54" height="21"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <state key="normal" title="Play"/>
-                                <connections>
-                                    <action selector="playMusic:" destination="BYZ-38-t0r" eventType="touchUpInside" id="v3t-7a-QEC"/>
-                                </connections>
-                            </button>
-                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ov8-eW-a5V">
-                                <rect key="frame" x="206" y="310" width="114" height="30"/>
+                                <fontDescription key="fontDescription" name="Avenir-Book" family="Avenir" pointSize="17"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Music" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="6eR-TD-zQv">
+                                <rect key="frame" x="164" y="232" width="46" height="21"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <state key="normal" title="Next"/>
-                                <connections>
-                                    <action selector="nextMusic:" destination="BYZ-38-t0r" eventType="touchUpInside" id="VW2-hk-u95"/>
-                                </connections>
-                            </button>
-                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="QEG-cU-pLS">
-                                <rect key="frame" x="50" y="310" width="114" height="30"/>
+                                <fontDescription key="fontDescription" name="Avenir-Book" family="Avenir" pointSize="17"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <segmentedControl opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="myb-8m-9uL" customClass="CustomUISegmentedControl" customModule="SampleMusicController" customModuleProvider="target">
+                                <rect key="frame" x="16" y="261" width="343" height="29"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <state key="normal" title="Prev"/>
+                                <segments>
+                                    <segment title="Default"/>
+                                    <segment title="Title"/>
+                                    <segment title="Count"/>
+                                    <segment title="Add"/>
+                                    <segment title="Shuffle"/>
+                                </segments>
                                 <connections>
-                                    <action selector="prevMusic:" destination="BYZ-38-t0r" eventType="touchUpInside" id="Naw-Fu-9X5"/>
+                                    <action selector="sortTypeSegmentedControlChanged:" destination="BYZ-38-t0r" eventType="valueChanged" id="T2a-AP-3Aa"/>
                                 </connections>
-                            </button>
-                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="F7g-3i-Apw">
-                                <rect key="frame" x="206" y="187" width="114" height="30"/>
+                            </segmentedControl>
+                            <segmentedControl opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="8HG-IA-Uyg" customClass="CustomUISegmentedControl" customModule="SampleMusicController" customModuleProvider="target">
+                                <rect key="frame" x="16" y="457" width="143" height="29"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <state key="normal" title="Pause"/>
+                                <segments>
+                                    <segment title="None"/>
+                                    <segment title="Loop"/>
+                                </segments>
                                 <connections>
-                                    <action selector="pauseMusic:" destination="BYZ-38-t0r" eventType="touchUpInside" id="L6D-pa-duh"/>
+                                    <action selector="loopSegmentedControlChanged:" destination="BYZ-38-t0r" eventType="valueChanged" id="7pH-9g-9Qt"/>
                                 </connections>
-                            </button>
-                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="qbe-Ue-yfC">
-                                <rect key="frame" x="130" y="412" width="114" height="30"/>
+                            </segmentedControl>
+                            <segmentedControl opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="ddJ-Aa-nEg" customClass="CustomUISegmentedControl" customModule="SampleMusicController" customModuleProvider="target">
+                                <rect key="frame" x="183" y="457" width="176" height="29"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <state key="normal" title="Stop"/>
+                                <segments>
+                                    <segment title="None"/>
+                                    <segment title="Repeat"/>
+                                    <segment title="Count"/>
+                                </segments>
                                 <connections>
-                                    <action selector="stopMusic:" destination="BYZ-38-t0r" eventType="touchUpInside" id="Xes-t6-fuS"/>
+                                    <action selector="repeartSegmentedControlChanged:" destination="BYZ-38-t0r" eventType="valueChanged" id="rmJ-2H-Jgc"/>
                                 </connections>
-                            </button>
-                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="L1Z-4A-F8P">
-                                <rect key="frame" x="130" y="90" width="114" height="30"/>
+                            </segmentedControl>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="99" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="zKa-fX-cz6">
+                                <rect key="frame" x="198" y="516" width="46" height="21"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <state key="normal" title="Set"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <stepper opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="3" minimumValue="1" maximumValue="999" translatesAutoresizingMaskIntoConstraints="NO" id="LJu-y4-2jk">
+                                <rect key="frame" x="265" y="512" width="94" height="29"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <connections>
-                                    <action selector="musicSet:" destination="BYZ-38-t0r" eventType="touchUpInside" id="Vge-Cz-emV"/>
+                                    <action selector="repeatCountStepperChanged:" destination="BYZ-38-t0r" eventType="valueChanged" id="Y1F-lI-3UY"/>
                                 </connections>
-                            </button>
+                            </stepper>
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                        <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
+                        <constraints>
+                            <constraint firstItem="zVT-gv-noW" firstAttribute="leading" secondItem="BFg-gZ-0f1" secondAttribute="leading" id="44M-Ed-GGx"/>
+                            <constraint firstItem="zVT-gv-noW" firstAttribute="bottom" secondItem="BFg-gZ-0f1" secondAttribute="bottom" id="fEC-Yz-tv0"/>
+                            <constraint firstItem="zVT-gv-noW" firstAttribute="trailing" secondItem="BFg-gZ-0f1" secondAttribute="trailing" id="t1x-iw-zrX"/>
+                        </constraints>
+                        <viewLayoutGuide key="safeArea" id="BFg-gZ-0f1"/>
                     </view>
+                    <toolbarItems/>
+                    <simulatedToolbarMetrics key="simulatedBottomBarMetrics"/>
+                    <connections>
+                        <outlet property="musicControlToolbar" destination="zVT-gv-noW" id="kKJ-RK-4Jf"/>
+                        <outlet property="musicPicker" destination="chl-To-YAc" id="gGV-jT-o9n"/>
+                        <outlet property="playlistPicker" destination="Uzt-zY-6zh" id="tR2-YP-2wX"/>
+                        <outlet property="repeatCountLabel" destination="zKa-fX-cz6" id="LQz-7f-XUm"/>
+                        <outlet property="repeatCountStepper" destination="LJu-y4-2jk" id="DpW-qE-I8Q"/>
+                        <outlet property="sortTypeControl" destination="myb-8m-9uL" id="b2j-O0-KcB"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
+            <point key="canvasLocation" x="32.799999999999997" y="33.733133433283363"/>
         </scene>
     </scenes>
 </document>
