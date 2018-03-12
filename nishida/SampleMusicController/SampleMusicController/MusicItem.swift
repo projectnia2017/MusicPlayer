@@ -66,7 +66,13 @@ class SongItem {
     }
     var dateAdded: Date {
         get{
-            return (mediaItem?.dateAdded)!
+            if self.mediaItem?.assetURL != nil {
+                //追加日
+                return (self.mediaItem?.dateAdded)!
+            } else {
+                //AppleMusicから購入した場合はdateAddedがないため、releaseDate
+                return (self.mediaItem?.releaseDate)!
+            }
         }
     }
     var artwork: MPMediaItemArtwork? {
@@ -86,6 +92,7 @@ class SongItem {
     var lastPlayingDateString: String =  ""
     var playCount: Int = 0
     var skipCount: Int = 0
+    
 }
 
 //MARK: - Realm

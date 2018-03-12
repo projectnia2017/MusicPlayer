@@ -77,7 +77,6 @@ class MusicDataController: NSObject, AVAudioPlayerDelegate  {
         
         //クエリー取得
         let playlistQuery = MPMediaQuery.playlists()
-        playlistQuery.addFilterPredicate(MPMediaPropertyPredicate(value: false, forProperty: MPMediaItemPropertyIsCloudItem))
         let playlistCollections = playlistQuery.collections
         
         //プレイリストデータ作成
@@ -151,7 +150,6 @@ class MusicDataController: NSObject, AVAudioPlayerDelegate  {
         
         //クエリー取得
         let albumQuery = MPMediaQuery.albums()
-        albumQuery.addFilterPredicate(MPMediaPropertyPredicate(value: false, forProperty: MPMediaItemPropertyIsCloudItem))
         let albumCollections = albumQuery.collections
         
         //アルバムデータ作成
@@ -261,7 +259,6 @@ class MusicDataController: NSObject, AVAudioPlayerDelegate  {
                            sortOrder:SortOrder = SortOrder.ASCENDING) -> Array<SongItem>{
         //クエリー取得
         let albumQuery = MPMediaQuery.albums()
-        albumQuery.addFilterPredicate(MPMediaPropertyPredicate(value: false, forProperty: MPMediaItemPropertyIsCloudItem))
         let albumCollections = albumQuery.collections
         let album:MPMediaItemCollection = albumCollections![id]
         
@@ -283,7 +280,6 @@ class MusicDataController: NSObject, AVAudioPlayerDelegate  {
                          sortOrder:SortOrder = SortOrder.ASCENDING) -> Array<SongItem>{
         //クエリー取得
         let albumQuery = MPMediaQuery.albums()
-        albumQuery.addFilterPredicate(MPMediaPropertyPredicate(value: false, forProperty: MPMediaItemPropertyIsCloudItem))
         let albumCollections = albumQuery.collections
         
         let filterdAlbumDataItems: Results<AlbumDataItem>? = getFilterdAlbumDataItems()
@@ -317,7 +313,6 @@ class MusicDataController: NSObject, AVAudioPlayerDelegate  {
     private func createSongList(collection: MPMediaItemCollection,
                                 startId: Int = 0,
                                 filteredAlbumDataItems: Results<AlbumDataItem>? = nil ) -> Array<SongItem>{
-        
         let formatter = DateFormatter()
         
         var songList:Array<SongItem> = []
@@ -326,7 +321,7 @@ class MusicDataController: NSObject, AVAudioPlayerDelegate  {
         
         for_i: for song in collection.items {
             
-            //フィルタリング
+            //設定したアルバムをフィルタリング
             if filteredAlbumDataItems != nil {
                 for_j: for filter in filteredAlbumDataItems! {
                     if song.albumTitle == filter.title && song.artist == filter.artist {
@@ -335,6 +330,17 @@ class MusicDataController: NSObject, AVAudioPlayerDelegate  {
                 }
             }
             
+            //クラウド上の曲をフィルタリング
+            let songQuery = MPMediaQuery.songs()
+            songQuery.addFilterPredicate(MPMediaPropertyPredicate(value: false, forProperty: MPMediaItemPropertyIsCloudItem))
+            songQuery.addFilterPredicate(MPMediaPropertyPredicate(value: song.title, forProperty: MPMediaItemPropertyTitle, comparisonType: MPMediaPredicateComparison.contains))
+            songQuery.addFilterPredicate(MPMediaPropertyPredicate(value: song.artist, forProperty: MPMediaItemPropertyArtist, comparisonType: MPMediaPredicateComparison.contains))
+
+            if songQuery.collections?.count == 0 {
+                break for_i
+            }
+            
+            //SongItemを作成
             let item = SongItem()
             item.id = songId
             item.mediaItem = song
@@ -367,6 +373,7 @@ class MusicDataController: NSObject, AVAudioPlayerDelegate  {
                 
                 item.playCount = (playingDataItem?.playCount)!
                 item.skipCount = (playingDataItem?.skipCount)!
+                
             } else {
                 item.lastPlayingDate = Date()
                 formatter.dateFormat = "yyyy/MM/dd"
@@ -381,8 +388,14 @@ class MusicDataController: NSObject, AVAudioPlayerDelegate  {
         
         return songList
     }
-    //曲リストのソート
-    private func sortSongList(songList: Array<SongItem>,
+    /**
+     曲リストのソート
+     - parameter songList: 曲リスト
+     - parameter sortType: ソート方法
+     - parameter sortOrder: ソート順
+     - returns: SongItemの配列
+     */
+    func sortSongList(songList: Array<SongItem>,
                               sortType:SortType = SortType.DEFAULT,
                               sortOrder:SortOrder = SortOrder.ASCENDING) -> Array<SongItem>{
         //シャッフルではなかった場合、シャッフルカウントをリセット

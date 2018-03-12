@@ -24,6 +24,7 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
     private var currentSongId: Int = 0
     private var currentSortOrder: MusicDataController.SortOrder = MusicDataController.SortOrder.ASCENDING
     private var repeatCount: Int = 3
+    private var isChangeSongList: Bool = false
     
     //システムボリューム用
     private var volumeSlider: UISlider!
@@ -57,17 +58,12 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
         )
         NotificationCenter.default.addObserver(
             self,
-            selector: #selector(self.onTrackAutoChangedNotification(notification:)),
-            name: Notification.Name(rawValue: MusicController.OnTrackAutoChangedNotification),
-            object: nil
-        )
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(self.onPlaylistEndNotification(notification:)),
-            name: Notification.Name(rawValue: MusicController.OnPlaylistEndNotification),
+            selector: #selector(self.onNowPlayingItemChanged),
+            name: NSNotification.Name(rawValue: MusicController.OnNowPlayingItemChanged),
             object: nil
         )
     }
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -110,8 +106,8 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
         }
         //UserDefaultsから取得
         if UserDefaults.standard.object(forKey: "volume") != nil {
-            let volume = UserDefaults.standard.float(forKey: "volume")
-            self.volumeSlider.setValue(volume, animated: false)
+            //let volume = UserDefaults.standard.float(forKey: "volume")
+            //self.volumeSlider.setValue(volume, animated: false)
         }
     }
     
@@ -128,11 +124,16 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
         self.playlistPicker.dataSource = self
         
         self.playlistPicker.selectRow(0, inComponent: 0, animated: true)
-        self.setMusicFromPlaylist(playlistId: self.playlists[0].id)
+        
+        self.currentPlaylistId = self.playlists[self.currentPlaylistId].id
+        
+        self.setMusicFromPlaylist(playlistId: self.currentPlaylistId)
     }
     func setMusicFromPlaylist(playlistId: Int, songId: Int = 0) {
         
-        self.musicController.stop()
+        if self.musicController.currentStatus == MusicController.PlayerStatus.PLAY || self.musicController.currentStatus == MusicController.PlayerStatus.PAUSE {
+            self.musicController.stop()
+        }
         
         self.currentSongId = songId
         
@@ -146,15 +147,32 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
         
         self.musicPicker.selectRow(self.currentSongId, inComponent: 0, animated: true)
         
+        isChangeSongList = true
+        
         //プレイヤーの設定
-        self.musicController.setPlayer(list: self.currentSongList, id: self.currentSongId)
+        //self.musicController.setPlayer(list: self.currentSongList, id: self.currentSongId)
     }
-    
+    func changeSortType() {
+        let sortType:MusicDataController.SortType = musicDataController.SortTypeListSong[self.sortTypeControl.selectedSegmentIndex]
+        
+        self.currentSongList = musicDataController.sortSongList(songList: self.currentSongList, sortType: sortType)
+        
+        self.musicPicker.dataSource = self
+        self.musicPicker.delegate = self
+        
+        self.musicPicker.selectRow(self.currentSongId, inComponent: 0, animated: true)
+        
+        isChangeSongList = true
+        
+        //プレイヤーの設定
+        //self.musicController.setPlayer(list: self.currentSongList, id: self.currentSongId)
+    }
     //MARK: - IBAction
     @IBAction func sortTypeSegmentedControlChanged(_ sender: CustomUISegmentedControl) {
+        
         if sender.changed == true {
             self.musicController.stop()
-            setMusicFromPlaylist(playlistId: self.currentPlaylistId)
+            changeSortType()
         } else {
             let sortType:MusicDataController.SortType = musicDataController.SortTypeListSong[sender.selectedSegmentIndex]
             
@@ -162,12 +180,12 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
                 //シャッフルの場合は再シャッフル
                 self.musicController.stop()
                 musicDataController.reShuffle()
-                setMusicFromPlaylist(playlistId: self.currentPlaylistId)
+                changeSortType()
             } else {
                 //シャッフル以外の場合は昇順・降順を反転
-                self.currentSongId = self.musicController.reverse()
-                self.currentSongList = self.musicController.currentSongList
-                self.musicPicker.selectRow(self.currentSongId, inComponent: 0, animated: true)
+//                self.currentSongId = self.musicController.reverse()
+//                self.currentSongList = self.musicController.currentSongList
+//                self.musicPicker.selectRow(self.currentSongId, inComponent: 0, animated: true)
             }
         }
     }
@@ -208,6 +226,12 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
     
     //toolbar
     @IBAction func playMusic(_ sender: Any) {
+        if isChangeSongList == true {
+            self.musicController.setPlayer(list: self.currentSongList, id: self.currentSongId)
+            
+            isChangeSongList = false
+        }
+        
         self.musicController.play()
     }
     
@@ -274,10 +298,10 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
             self.setMusicFromPlaylist(playlistId: self.currentPlaylistId)
         } else if pickerView === self.musicPicker {
             self.currentSongId = row
-            self.musicController.setPlayer(id: self.currentSongId)
-            if self.musicController.currentStatus == MusicController.PlayerStatus.PLAY {
-                self.musicController.play()
-            }
+//            self.musicController.setPlayer(id: self.currentSongId)
+//            if self.musicController.currentStatus == MusicController.PlayerStatus.PLAY {
+//                self.musicController.play()
+//            }
         } else {
             
         }
@@ -295,14 +319,8 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
             self.volumeSlider.setValue(volume, animated: false)
         }
     }
-    @objc func onTrackAutoChangedNotification(notification: NSNotification?) {
-        self.currentSongId = self.musicController.currentSongId
-        self.musicPicker.selectRow(self.currentSongId, inComponent: 0, animated: true)
-    }
-    @objc func onPlaylistEndNotification(notification: NSNotification?) {
-        self.currentSongId = 0
-        self.musicPicker.selectRow(0, inComponent: 0, animated: true)
-        self.musicController.setPlayer(id: 0)
+    @objc func onNowPlayingItemChanged(notification: NSNotification?) {
+        //self.musicPicker.selectRow(musicController.currentSongId, inComponent: 0, animated: true)
     }
     
     //MARK: - test
