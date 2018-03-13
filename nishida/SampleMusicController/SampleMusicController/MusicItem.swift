@@ -44,36 +44,12 @@ class SongItem {
     var mediaItem: MPMediaItem? = nil
     
     //MPMediaItemから取得
-    var title: String {
-        get{
-            return (mediaItem?.title)!
-        }
-    }
-    var artist: String {
-        get{
-            return (mediaItem?.artist)!
-        }
-    }
-    var albumTitle: String {
-        get{
-            return (mediaItem?.albumTitle)!
-        }
-    }
-    var trackNumber: Int {
-        get{
-            return (mediaItem?.albumTrackNumber)!
-        }
-    }
-    var dateAdded: Date {
-        get{
-            return (mediaItem?.dateAdded)!
-        }
-    }
-    var artwork: MPMediaItemArtwork? {
-        get{
-            return self.mediaItem?.artwork
-        }
-    }
+    var title: String = ""
+    var artist: String = ""
+    var albumTitle: String = ""
+    var trackNumber: Int = 0
+    var dateAdded: Date? = nil
+    var artwork: MPMediaItemArtwork? = nil
     
     //MPMediaItemから加工
     var duration: String = ""
