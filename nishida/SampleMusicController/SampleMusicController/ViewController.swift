@@ -21,10 +21,10 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
     private var currentSongList: Array<SongItem> = []
     
     private var currentPlaylistId: Int = 0
-    private var currentSongId: Int = 0
+    private var selectedSongId: Int = 0
     private var currentSortOrder: MusicDataController.SortOrder = MusicDataController.SortOrder.ASCENDING
     private var repeatCount: Int = 3
-    private var isChangeSongList: Bool = false
+    private var songChanged: Bool = false
     
     //システムボリューム用
     private var volumeSlider: UISlider!
@@ -77,7 +77,6 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
         //UI初期化
         self.repeatCountStepper.value = Double(self.repeatCount)
         self.repeatCountLabel.text = String(Int(self.repeatCountStepper.value))
-        //self.musicControlToolbar
         
         //メディア利用の許可確認
         MPMediaLibrary.requestAuthorization { (status) in
@@ -129,14 +128,7 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
         
         self.setMusicFromPlaylist(playlistId: self.currentPlaylistId)
     }
-    func setMusicFromPlaylist(playlistId: Int, songId: Int = 0) {
-        
-        if self.musicController.currentStatus == MusicController.PlayerStatus.PLAY || self.musicController.currentStatus == MusicController.PlayerStatus.PAUSE {
-            self.musicController.stop()
-        }
-        
-        self.currentSongId = songId
-        
+    func setMusicFromPlaylist(playlistId: Int) {
         let sortType:MusicDataController.SortType = musicDataController.SortTypeListSong[self.sortTypeControl.selectedSegmentIndex]
         
         //プレイリスト内の曲の取得
@@ -145,12 +137,10 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
         self.musicPicker.dataSource = self
         self.musicPicker.delegate = self
         
-        self.musicPicker.selectRow(self.currentSongId, inComponent: 0, animated: true)
+        self.selectedSongId = 0
+        self.musicPicker.selectRow(0, inComponent: 0, animated: true)
         
-        isChangeSongList = true
-        
-        //プレイヤーの設定
-        //self.musicController.setPlayer(list: self.currentSongList, id: self.currentSongId)
+        songChanged = true
     }
     func changeSortType() {
         let sortType:MusicDataController.SortType = musicDataController.SortTypeListSong[self.sortTypeControl.selectedSegmentIndex]
@@ -160,32 +150,37 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
         self.musicPicker.dataSource = self
         self.musicPicker.delegate = self
         
-        self.musicPicker.selectRow(self.currentSongId, inComponent: 0, animated: true)
+        self.selectedSongId = 0
+        self.musicPicker.selectRow(0, inComponent: 0, animated: true)
         
-        isChangeSongList = true
+        songChanged = true
+    }
+    func reverseSortOrder() {
         
-        //プレイヤーの設定
-        //self.musicController.setPlayer(list: self.currentSongList, id: self.currentSongId)
+        self.currentSongList.reverse()
+        
+        self.musicPicker.dataSource = self
+        self.musicPicker.delegate = self
+        
+        self.selectedSongId = 0
+        self.musicPicker.selectRow(0, inComponent: 0, animated: true)
+        
+        songChanged = true
     }
     //MARK: - IBAction
     @IBAction func sortTypeSegmentedControlChanged(_ sender: CustomUISegmentedControl) {
         
         if sender.changed == true {
-            self.musicController.stop()
             changeSortType()
         } else {
             let sortType:MusicDataController.SortType = musicDataController.SortTypeListSong[sender.selectedSegmentIndex]
             
             if sortType == MusicDataController.SortType.SHUFFLE {
-                //シャッフルの場合は再シャッフル
-                self.musicController.stop()
-                musicDataController.reShuffle()
+                //シャッフル
                 changeSortType()
             } else {
                 //シャッフル以外の場合は昇順・降順を反転
-//                self.currentSongId = self.musicController.reverse()
-//                self.currentSongList = self.musicController.currentSongList
-//                self.musicPicker.selectRow(self.currentSongId, inComponent: 0, animated: true)
+                reverseSortOrder()
             }
         }
     }
@@ -226,10 +221,10 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
     
     //toolbar
     @IBAction func playMusic(_ sender: Any) {
-        if isChangeSongList == true {
-            self.musicController.setPlayer(list: self.currentSongList, id: self.currentSongId)
-            
-            isChangeSongList = false
+        if songChanged == true {
+            songChanged = false
+            self.musicController.stop()
+            self.musicController.setPlayer(list: self.currentSongList, id: self.selectedSongId)
         }
         
         self.musicController.play()
@@ -240,16 +235,12 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
     }
     
     @IBAction func prevMusic(_ sender: Any) {
-        let playingId = self.musicController.prev()
-        self.musicPicker.selectRow(playingId, inComponent: 0, animated: true)
+        self.musicController.prev()
     }
     
     @IBAction func nextMusic(_ sender: Any) {
-        let playingId = self.musicController.next()
-        
-        self.musicPicker.selectRow(playingId, inComponent: 0, animated: true)
+        self.musicController.next()
     }
-    
     
     func nowPlayingItemChanged(notification: NSNotification) {
         
@@ -297,13 +288,9 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
             self.currentPlaylistId = self.playlists[row].id
             self.setMusicFromPlaylist(playlistId: self.currentPlaylistId)
         } else if pickerView === self.musicPicker {
-            self.currentSongId = row
-//            self.musicController.setPlayer(id: self.currentSongId)
-//            if self.musicController.currentStatus == MusicController.PlayerStatus.PLAY {
-//                self.musicController.play()
-//            }
+            self.selectedSongId = row
+            songChanged = true
         } else {
-            
         }
     }
     
@@ -320,7 +307,6 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
         }
     }
     @objc func onNowPlayingItemChanged(notification: NSNotification?) {
-        //self.musicPicker.selectRow(musicController.currentSongId, inComponent: 0, animated: true)
     }
     
     //MARK: - test
@@ -346,9 +332,6 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
         musicDataController.setFilterdAlbumDataItem(title: "TOEIC Testに必要な文法‣単語・熟語が同時に身につく本", artist: "かんき出版", visible: false)
     }
     func testSet(_ sender: Any) {
-        
-        musicDataController.reShuffle()
-        
         //プレイリスト内の曲の取得
         //self.songs = musicDataController.getSongsWithPlaylist(id: 0, sortType: MusicDataController.SortType.ARTIST, sortOrder: MusicDataController.SortOrder.ASCENDING)
         //self.songs = musicDataController.getSongsWithPlaylist(id: 4, sortType: MusicDataController.SortType.DEFAULT, sortOrder: MusicDataController.SortOrder.ASCENDING)

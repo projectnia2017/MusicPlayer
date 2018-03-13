@@ -52,7 +52,8 @@ class MusicController: NSObject {
     //var player = MPMusicPlayerController.applicationMusicPlayer
     var currentSongList: Array<SongItem>!
     var currentSongId: Int
-    var currentMediaCollections : MPMediaItemCollection?
+    var currentMediaItems : Array<MPMediaItem>!
+    var currentMediaItemCollections : MPMediaItemCollection?
     
     //状態
     var currentStatus: PlayerStatus = PlayerStatus.STOP
@@ -77,7 +78,8 @@ class MusicController: NSObject {
         
         self.currentSongList = nil
         self.currentSongId = 0
-        self.currentMediaCollections = nil
+        self.currentMediaItems = nil
+        self.currentMediaItemCollections = nil
         
         self.audioSession = AVAudioSession.sharedInstance()
         self.commandCenter = MPRemoteCommandCenter.shared()
@@ -127,20 +129,18 @@ class MusicController: NSObject {
             self.currentSongId = currentSongList.count - 1
         }
         
-        var mediaItems: Array<MPMediaItem> = []
+        self.currentMediaItems = []
         for song in list {
-            mediaItems.append(song.mediaItem!)
+            self.currentMediaItems.append(song.mediaItem!)
         }
         
-        self.currentMediaCollections = MPMediaItemCollection.init(items: mediaItems)
+        self.currentMediaItemCollections = MPMediaItemCollection.init(items: self.currentMediaItems)
         
-        self.player.setQueue(with: self.currentMediaCollections!)
-        self.player.prepareToPlay()
-        self.player.nowPlayingItem = self.currentMediaCollections?.items[id]
+        self.player.setQueue(with: self.currentMediaItemCollections!)
+        //self.player.prepareToPlay()
+        self.player.nowPlayingItem = self.currentMediaItemCollections?.items[id]
         
     }
-    
-    
     //曲のセット：開始番号のみ
     /**
      現在再生中のリストに別の開始位置をセットする
@@ -149,17 +149,8 @@ class MusicController: NSObject {
      */
     func setPlayer(id: Int = 0){
         if self.currentSongList != nil {
-            self.player.nowPlayingItem = self.currentMediaCollections?.items[id]
+            self.player.nowPlayingItem = self.currentMediaItemCollections?.items[id]
         }
-    }
-    //曲順を反転
-    /**
-     現在再生中のリストに別の開始位置をセットする
-     - returns: 再生位置
-     */
-    func reverse() -> Int{
-        
-        return 0
     }
     //モード設定
     /**
@@ -168,7 +159,6 @@ class MusicController: NSObject {
      */
     func setLoopMode(mode: LoopMode){
         self.currentLoopMode = mode
-        
         switch mode {
         case .NOLOOP:
             self.player.repeatMode = MPMusicRepeatMode.all
@@ -177,7 +167,6 @@ class MusicController: NSObject {
             self.player.repeatMode = MPMusicRepeatMode.none
             break;
         }
-        
     }
     /**
      リピートの設定
@@ -217,19 +206,15 @@ class MusicController: NSObject {
      楽曲の再生
      */
     func play() {
-        if self.player.nowPlayingItem != nil {
-            self.currentStatus = PlayerStatus.PLAY
-            self.player.play()
-        }
+        self.currentStatus = PlayerStatus.PLAY
+        self.player.play()
     }
     /**
      楽曲の一時停止
      */
     func pause() {
-        if self.player.nowPlayingItem != nil {
-            self.currentStatus = PlayerStatus.PAUSE
-            self.player.pause()
-        }
+        self.currentStatus = PlayerStatus.PAUSE
+        self.player.pause()
     }
     /**
      次の楽曲へ移動
@@ -238,16 +223,15 @@ class MusicController: NSObject {
      */
     @discardableResult
     func next(auto: Bool = false) -> Int {
-        if self.player.nowPlayingItem != nil {
-            //50%の位置より前でスキップした場合にスキップカウントを書き込み
-            if self.player.currentPlaybackTime < ((self.player.nowPlayingItem?.playbackDuration)! / 2 ) {
-                //Realmへ書き込み
+        //50%の位置より前でスキップした場合にスキップカウントを書き込み
+        if self.player.currentPlaybackTime < ((self.player.nowPlayingItem?.playbackDuration)! / 2 ) {
+            //Realmへ書き込み
+            if self.player.nowPlayingItem != nil {
                 writeSkipCountData()
             }
-            self.player.skipToNextItem()
-            return self.player.indexOfNowPlayingItem
         }
-        return -1
+        self.player.skipToNextItem()
+        return self.player.indexOfNowPlayingItem
     }
     /**
      前の楽曲へ移動
@@ -255,22 +239,15 @@ class MusicController: NSObject {
      */
     @discardableResult
     func prev() -> Int {
-        if self.player.nowPlayingItem != nil {
-            self.player.skipToPreviousItem()
-            return self.player.indexOfNowPlayingItem
-        }
-        return -1
-        
+        self.player.skipToPreviousItem()
+        return self.player.indexOfNowPlayingItem
     }
     /**
      楽曲再生を停止
      */
     func stop() {
-        if self.currentMediaCollections != nil{
-            self.currentStatus = PlayerStatus.STOP
-            
-            self.player.stop()
-        }
+        self.currentStatus = PlayerStatus.STOP
+        self.player.stop()
     }
     
     @objc func onNowPlayingItemChanged(notification: NSNotification?) {
@@ -278,7 +255,7 @@ class MusicController: NSObject {
         if self.player.nowPlayingItem != nil {
             writePlayingDataItem()
         }
-        
+
         //カウントリピート
         if self.currentRepeatMode == RepeatMode.COUNT && self.player.repeatMode == MPMusicRepeatMode.one {
             self.currentCount += 1
@@ -288,14 +265,14 @@ class MusicController: NSObject {
                 return
             }
         }
-        
+
         if self.currentRepeatMode == RepeatMode.COUNT && self.player.repeatMode == MPMusicRepeatMode.none {
             self.player.repeatMode = MPMusicRepeatMode.one
             return
         }
-        
+
         self.currentSongId = self.player.indexOfNowPlayingItem
-        
+
         notifyOnNowPlayingItemChanged()
     }
     @objc func onPlaybackStateDidChange(notification: NSNotification?) {
@@ -303,7 +280,7 @@ class MusicController: NSObject {
     }
     //post
     func notifyOnNowPlayingItemChanged() {
-        self.notificationCenter.post(name: Notification.Name(rawValue: MusicController.OnNowPlayingItemChanged), object: self)
+       self.notificationCenter.post(name: Notification.Name(rawValue: MusicController.OnNowPlayingItemChanged), object: self)
     }
     
     //MARK: - Realmデータベース

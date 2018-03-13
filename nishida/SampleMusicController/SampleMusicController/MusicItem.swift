@@ -44,42 +44,12 @@ class SongItem {
     var mediaItem: MPMediaItem? = nil
     
     //MPMediaItemから取得
-    var title: String {
-        get{
-            return (mediaItem?.title)!
-        }
-    }
-    var artist: String {
-        get{
-            return (mediaItem?.artist)!
-        }
-    }
-    var albumTitle: String {
-        get{
-            return (mediaItem?.albumTitle)!
-        }
-    }
-    var trackNumber: Int {
-        get{
-            return (mediaItem?.albumTrackNumber)!
-        }
-    }
-    var dateAdded: Date {
-        get{
-            if self.mediaItem?.assetURL != nil {
-                //追加日
-                return (self.mediaItem?.dateAdded)!
-            } else {
-                //AppleMusicから購入した場合はdateAddedがないため、releaseDate
-                return (self.mediaItem?.releaseDate)!
-            }
-        }
-    }
-    var artwork: MPMediaItemArtwork? {
-        get{
-            return self.mediaItem?.artwork
-        }
-    }
+    var title: String = ""
+    var artist: String = ""
+    var albumTitle: String = ""
+    var trackNumber: Int = 0
+    var dateAdded: Date? = nil
+    var artwork: MPMediaItemArtwork? = nil
     
     //MPMediaItemから加工
     var duration: String = ""
@@ -92,7 +62,6 @@ class SongItem {
     var lastPlayingDateString: String =  ""
     var playCount: Int = 0
     var skipCount: Int = 0
-    
 }
 
 //MARK: - Realm
