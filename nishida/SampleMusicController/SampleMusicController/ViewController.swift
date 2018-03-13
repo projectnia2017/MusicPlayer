@@ -84,11 +84,11 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
                 //self.testLoad()
                 
                 DispatchQueue.main.async {
-                    self.setPlaylist()
+                    Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(ViewController.setPlaylist), userInfo: nil, repeats: false)
                 }
                 
             } else {
-                print("not authorization")
+                print("Not Authorization")
             }
         }
         
@@ -116,7 +116,7 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
     }
     
     //MARK: - Player
-    func setPlaylist() {
+    @objc func setPlaylist() {
         self.playlists = musicDataController.getPlaylists(sortType: MusicDataController.SortType.TITLE, sortOrder: MusicDataController.SortOrder.ASCENDING)
         
         self.playlistPicker.delegate = self

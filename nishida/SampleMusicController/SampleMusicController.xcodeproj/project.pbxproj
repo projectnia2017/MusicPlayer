@@ -12,6 +12,7 @@
 		C0176CB92051739100994346 /* RealmSwift.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = C0176CB620516DF800994346 /* RealmSwift.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		C0176CBA2051739400994346 /* Realm.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = C0176CB420516DEA00994346 /* Realm.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		C0176CC12054D86B00994346 /* CustomUISegmentedControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0176CC02054D86B00994346 /* CustomUISegmentedControl.swift */; };
+		C081FA9520583602005383A0 /* DeployGateSDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C081FA9420583602005383A0 /* DeployGateSDK.framework */; };
 		C08B7D18204A44F600D777B7 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = C08B7D17204A44F600D777B7 /* AppDelegate.swift */; };
 		C08B7D1A204A44F600D777B7 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C08B7D19204A44F600D777B7 /* ViewController.swift */; };
 		C08B7D1D204A44F600D777B7 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C08B7D1B204A44F600D777B7 /* Main.storyboard */; };
@@ -69,6 +70,8 @@
 		C0176CB420516DEA00994346 /* Realm.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Realm.framework; path = "SampleMusicController/Realm/swift-4.0.2/Realm.framework"; sourceTree = "<group>"; };
 		C0176CB620516DF800994346 /* RealmSwift.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = RealmSwift.framework; path = "SampleMusicController/Realm/swift-4.0.2/RealmSwift.framework"; sourceTree = "<group>"; };
 		C0176CC02054D86B00994346 /* CustomUISegmentedControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomUISegmentedControl.swift; sourceTree = "<group>"; };
+		C081FA9420583602005383A0 /* DeployGateSDK.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = DeployGateSDK.framework; path = SampleMusicController/DeployGate/DeployGateSDK.framework; sourceTree = "<group>"; };
+		C081FA962058363D005383A0 /* SampleMusicController-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "SampleMusicController-Bridging-Header.h"; sourceTree = "<group>"; };
 		C08B7D14204A44F600D777B7 /* SampleMusicController.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SampleMusicController.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C08B7D17204A44F600D777B7 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		C08B7D19204A44F600D777B7 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -94,6 +97,7 @@
 			files = (
 				C0176CB720516DF800994346 /* RealmSwift.framework in Frameworks */,
 				C0176CB520516DEA00994346 /* Realm.framework in Frameworks */,
+				C081FA9520583602005383A0 /* DeployGateSDK.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -117,6 +121,7 @@
 		C0176CB320516DEA00994346 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				C081FA9420583602005383A0 /* DeployGateSDK.framework */,
 				C0176CB620516DF800994346 /* RealmSwift.framework */,
 				C0176CB420516DEA00994346 /* Realm.framework */,
 			);
@@ -157,6 +162,7 @@
 				C08B7D1E204A44F600D777B7 /* Assets.xcassets */,
 				C08B7D20204A44F600D777B7 /* LaunchScreen.storyboard */,
 				C08B7D23204A44F600D777B7 /* Info.plist */,
+				C081FA962058363D005383A0 /* SampleMusicController-Bridging-Header.h */,
 			);
 			path = SampleMusicController;
 			sourceTree = "<group>";
@@ -191,6 +197,7 @@
 				C08B7D12204A44F600D777B7 /* Resources */,
 				C0176CB82051737800994346 /* CopyFiles */,
 				C0176CB020516D4C00994346 /* Embed Frameworks */,
+				C081FA9A20583D15005383A0 /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -249,6 +256,7 @@
 				TargetAttributes = {
 					C08B7D13204A44F600D777B7 = {
 						CreatedOnToolsVersion = 9.2;
+						LastSwiftMigration = 0920;
 						ProvisioningStyle = Automatic;
 						SystemCapabilities = {
 							com.apple.BackgroundModes = {
@@ -314,6 +322,22 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		C081FA9A20583D15005383A0 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "chmod 755 ${BUILT_PRODUCTS_DIR}/${FRAMEWORKS_FOLDER_PATH}/Realm.framework/strip-frameworks.sh\n${BUILT_PRODUCTS_DIR}/${FRAMEWORKS_FOLDER_PATH}/Realm.framework/strip-frameworks.sh";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		C08B7D10204A44F600D777B7 /* Sources */ = {
@@ -491,17 +515,21 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = C37NF56274;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/SampleMusicController/Realm",
 					"$(PROJECT_DIR)/SampleMusicController/Realm/swift-4.0.2",
+					"$(PROJECT_DIR)/SampleMusicController/DeployGate",
 				);
 				INFOPLIST_FILE = SampleMusicController/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = net.designergo.n.SampleMusicController;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "SampleMusicController/SampleMusicController-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 4.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -511,17 +539,20 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = C37NF56274;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/SampleMusicController/Realm",
 					"$(PROJECT_DIR)/SampleMusicController/Realm/swift-4.0.2",
+					"$(PROJECT_DIR)/SampleMusicController/DeployGate",
 				);
 				INFOPLIST_FILE = SampleMusicController/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = net.designergo.n.SampleMusicController;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "SampleMusicController/SampleMusicController-Bridging-Header.h";
 				SWIFT_VERSION = 4.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};

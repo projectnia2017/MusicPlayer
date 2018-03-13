@@ -16,6 +16,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
         
+        //DeployGate
+        DeployGateSDK.sharedInstance().launchApplication(withAuthor: "ProjectNIA", key: "d567665c1068c991e406533aeda9bcb615a69037")
+        
         return true
     }
 
