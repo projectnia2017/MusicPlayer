@@ -196,8 +196,8 @@
 				C08B7D11204A44F600D777B7 /* Frameworks */,
 				C08B7D12204A44F600D777B7 /* Resources */,
 				C0176CB82051737800994346 /* CopyFiles */,
-				C0176CB020516D4C00994346 /* Embed Frameworks */,
 				C081FA9A20583D15005383A0 /* ShellScript */,
+				C0176CB020516D4C00994346 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);

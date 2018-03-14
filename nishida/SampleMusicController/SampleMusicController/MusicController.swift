@@ -44,10 +44,12 @@ class MusicController: NSObject {
     }
     
     //MARK: - 通知
-    static let OnNowPlayingItemChanged = "MusicControllerOnNowPlayingItemChanged"
+    static let nowPlayingItemChanged = "MusicControllerNowPlayingItemChanged"
+    static let repeatCountChanged = "MusicControllerRepeatCountChanged"
     
     //MARK: - publicプロパティ
     //プレイヤー
+    //var player: AVAudioPlayer!
     var player = MPMusicPlayerController.systemMusicPlayer
     //var player = MPMusicPlayerController.applicationMusicPlayer
     var currentSongList: Array<SongItem>!
@@ -62,19 +64,14 @@ class MusicController: NSObject {
     var currentRepeatMode:RepeatMode = RepeatMode.NOREPEAT
     
     //カウント付きリピート
+    var currentCount = 1
     var repeatCount = 1
-    private var currentCount = 1
     
     //MARK: - privateプロパティ
     private let audioSession: AVAudioSession
-    private let commandCenter: MPRemoteCommandCenter
-    private let nowPlayingInfoCenter: MPNowPlayingInfoCenter
-    private let notificationCenter: NotificationCenter
     
     //MARK: - 初期化
     private override init(){
-        
-        UIApplication.shared.beginReceivingRemoteControlEvents()
         
         self.currentSongList = nil
         self.currentSongId = 0
@@ -82,9 +79,6 @@ class MusicController: NSObject {
         self.currentMediaItemCollections = nil
         
         self.audioSession = AVAudioSession.sharedInstance()
-        self.commandCenter = MPRemoteCommandCenter.shared()
-        self.nowPlayingInfoCenter = MPNowPlayingInfoCenter.default()
-        self.notificationCenter = NotificationCenter.default
         try! self.audioSession.setCategory(AVAudioSessionCategoryPlayback)
         try! self.audioSession.setActive(true)
         
@@ -93,19 +87,22 @@ class MusicController: NSObject {
         //通知
         NotificationCenter.default.addObserver(
             self,
-            selector: #selector(self.onNowPlayingItemChanged(notification:)),
+            selector: #selector(self.playbackStateDidChange(notification:)),
+            name: NSNotification.Name.MPMusicPlayerControllerPlaybackStateDidChange,
+            object: nil
+        )
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(self.nowPlayingItemChanged(notification:)),
             name: NSNotification.Name.MPMusicPlayerControllerNowPlayingItemDidChange,
             object: nil
         )
         NotificationCenter.default.addObserver(
             self,
-            selector: #selector(self.onPlaybackStateDidChange(notification:)),
-            name: NSNotification.Name.MPMusicPlayerControllerPlaybackStateDidChange,
+            selector: #selector(self.audioInterrupted(notification:)),
+            name: NSNotification.Name.AVAudioSessionInterruption,
             object: nil
         )
-        
-        // 通知の有効化
-        self.player.beginGeneratingPlaybackNotifications()
     }
     
     //MARK: - プレイヤーセットアップ
@@ -115,31 +112,32 @@ class MusicController: NSObject {
      - parameter id: 再生を開始する位置（0からlist.count-1までのindex）
      */
     func setPlayer(list: Array<SongItem>, id: Int = 0){
-        
         if list.count <= 0 {
             return
         }
-        
+
         self.currentSongList = list
         self.currentSongId = id
-        
+
         if id < 0 {
             self.currentSongId = 0
         } else if id >= currentSongList.count {
             self.currentSongId = currentSongList.count - 1
         }
-        
+
         self.currentMediaItems = []
         for song in list {
             self.currentMediaItems.append(song.mediaItem!)
         }
-        
+
         self.currentMediaItemCollections = MPMediaItemCollection.init(items: self.currentMediaItems)
-        
+
         self.player.setQueue(with: self.currentMediaItemCollections!)
-        //self.player.prepareToPlay()
+        self.player.prepareToPlay()
         self.player.nowPlayingItem = self.currentMediaItemCollections?.items[id]
         
+        // 通知の有効化
+        begeinNortify()
     }
     //曲のセット：開始番号のみ
     /**
@@ -176,8 +174,6 @@ class MusicController: NSObject {
     func setRepeatMode(mode: RepeatMode, count: Int = 1){
         self.currentRepeatMode = mode
         
-        self.currentCount = 1
-        
         switch mode {
         case RepeatMode.NOREPEAT:
             self.player.repeatMode = MPMusicRepeatMode.none
@@ -186,8 +182,14 @@ class MusicController: NSObject {
             self.player.repeatMode = MPMusicRepeatMode.one
             break;
         case RepeatMode.COUNT:
+            if self.currentStatus == PlayerStatus.STOP {
+                self.currentCount = 0
+            } else {
+                self.currentCount = 1
+            }
             self.repeatCount = count
             self.player.repeatMode = MPMusicRepeatMode.one
+            notifyRepeatCountChanged()
             break;
         }
     }
@@ -230,6 +232,7 @@ class MusicController: NSObject {
                 writeSkipCountData()
             }
         }
+        
         self.player.skipToNextItem()
         return self.player.indexOfNowPlayingItem
     }
@@ -248,39 +251,76 @@ class MusicController: NSObject {
     func stop() {
         self.currentStatus = PlayerStatus.STOP
         self.player.stop()
+        
+        endNortify()
     }
     
-    @objc func onNowPlayingItemChanged(notification: NSNotification?) {
+    
+    //MARK: - 通知
+    @objc private func begeinNortify() {
+        self.player.beginGeneratingPlaybackNotifications()
+    }
+    
+    @objc private func endNortify() {
+        self.player.endGeneratingPlaybackNotifications()
+    }
+    @objc func nowPlayingItemChanged(notification: NSNotification?) {
+        
+        //通知が複数回発生する問題への対応
+        endNortify()
+        DispatchQueue.main.async {
+            Timer.scheduledTimer(timeInterval: 0.5, target: self, selector: #selector(MusicController.begeinNortify), userInfo: nil, repeats: false)
+        }
+        
         //Realmへ書き込み
         if self.player.nowPlayingItem != nil {
             writePlayingDataItem()
         }
-
+        
         //カウントリピート
-        if self.currentRepeatMode == RepeatMode.COUNT && self.player.repeatMode == MPMusicRepeatMode.one {
-            self.currentCount += 1
-            if self.currentCount >= self.repeatCount {
+        if self.currentRepeatMode == RepeatMode.COUNT {
+            if self.player.repeatMode == MPMusicRepeatMode.one {
+                self.currentCount += 1
+                if self.currentCount >= self.repeatCount {
+                    self.player.repeatMode = MPMusicRepeatMode.none
+                }
+            } else if self.player.repeatMode == MPMusicRepeatMode.none {
                 self.currentCount = 1
-                self.player.repeatMode = MPMusicRepeatMode.none
-                return
+                self.player.repeatMode = MPMusicRepeatMode.one
             }
+            notifyRepeatCountChanged()
         }
-
-        if self.currentRepeatMode == RepeatMode.COUNT && self.player.repeatMode == MPMusicRepeatMode.none {
-            self.player.repeatMode = MPMusicRepeatMode.one
-            return
-        }
-
+        
         self.currentSongId = self.player.indexOfNowPlayingItem
 
-        notifyOnNowPlayingItemChanged()
+        notifyNowPlayingItemChanged()
     }
-    @objc func onPlaybackStateDidChange(notification: NSNotification?) {
+    @objc func playbackStateDidChange(notification: NSNotification?) {
         //print(self.player.playbackState.rawValue)
     }
+    @objc func audioInterrupted(notification: NSNotification?) {
+        let interruptionTypeObj = notification?.userInfo![AVAudioSessionInterruptionTypeKey] as! NSNumber
+        if let interruptionType = AVAudioSessionInterruptionType(rawValue:
+            interruptionTypeObj.uintValue) {
+            
+            switch interruptionType {
+            case .began:
+                
+                break
+            case .ended:
+                
+                break
+                
+            }
+        }
+    }
+    
     //post
-    func notifyOnNowPlayingItemChanged() {
-       self.notificationCenter.post(name: Notification.Name(rawValue: MusicController.OnNowPlayingItemChanged), object: self)
+    func notifyNowPlayingItemChanged() {
+        NotificationCenter.default.post(name: Notification.Name(rawValue: MusicController.nowPlayingItemChanged), object: self)
+    }
+    func notifyRepeatCountChanged() {
+       NotificationCenter.default.post(name: Notification.Name(rawValue: MusicController.repeatCountChanged), object: self)
     }
     
     //MARK: - Realmデータベース

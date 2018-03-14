@@ -39,6 +39,12 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
     
     @IBOutlet weak var repeatCountStepper: UIStepper!
     @IBOutlet weak var repeatCountLabel: UILabel!
+    @IBOutlet weak var repeatCurrentCountLabel: UILabel!
+    @IBOutlet weak var currentMediaItemArtwork: UIImageView!
+    
+    @IBOutlet weak var currentMediaItemTitle: UILabel!
+    @IBOutlet weak var currentMediaItemArtist: UILabel!
+    @IBOutlet weak var currentMediaItemAlbum: UILabel!
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
@@ -58,8 +64,14 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
         )
         NotificationCenter.default.addObserver(
             self,
-            selector: #selector(self.onNowPlayingItemChanged),
-            name: NSNotification.Name(rawValue: MusicController.OnNowPlayingItemChanged),
+            selector: #selector(self.nowPlayingItemChanged),
+            name: NSNotification.Name(rawValue: MusicController.nowPlayingItemChanged),
+            object: nil
+        )
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(self.repeatCountChanged),
+            name: NSNotification.Name(rawValue: MusicController.repeatCountChanged),
             object: nil
         )
     }
@@ -167,6 +179,18 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
         
         songChanged = true
     }
+    func setMediaItemInfo() {
+        let currentMediaItem = self.musicController.player.nowPlayingItem
+        self.currentMediaItemTitle.text = currentMediaItem?.title
+        self.currentMediaItemArtist.text = currentMediaItem?.artist
+        self.currentMediaItemAlbum.text = currentMediaItem?.albumTitle
+        
+        if currentMediaItem?.artwork != nil {
+            self.currentMediaItemArtwork.contentMode = UIViewContentMode.scaleAspectFit
+            self.currentMediaItemArtwork.image = currentMediaItem?.artwork?.image(at: CGSize(width:100, height:100))
+        }
+    }
+    
     //MARK: - IBAction
     @IBAction func sortTypeSegmentedControlChanged(_ sender: CustomUISegmentedControl) {
         
@@ -228,6 +252,8 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
         }
         
         self.musicController.play()
+        
+        setMediaItemInfo()
     }
     
     @IBAction func pauseMusic(_ sender: Any) {
@@ -241,16 +267,6 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
     @IBAction func nextMusic(_ sender: Any) {
         self.musicController.next()
     }
-    
-    func nowPlayingItemChanged(notification: NSNotification) {
-        
-        /*
-        if let mediaItem = musicController.player.nowPlayingItem {
-            
-        }
-        */
-    }
-    
     
     //MARK: - UIPickerViewDataSource
     func numberOfComponents(in pickerView: UIPickerView) -> Int {
@@ -293,6 +309,7 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
         } else {
         }
     }
+   
     
     //MARK: - 通知
     @objc func viewDidEnterBackground(notification: NSNotification?) {
@@ -306,8 +323,13 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
             self.volumeSlider.setValue(volume, animated: false)
         }
     }
-    @objc func onNowPlayingItemChanged(notification: NSNotification?) {
+    @objc func nowPlayingItemChanged(notification: NSNotification?) {
+        setMediaItemInfo()
     }
+    @objc func repeatCountChanged(notification: NSNotification?) {
+        self.repeatCurrentCountLabel.text =  String(self.musicController.currentCount)
+    }
+    
     
     //MARK: - test
     func testLoad(){
