@@ -136,7 +136,9 @@
 				C036D3BA20615A20007D145F /* AppDelegate.swift */,
 				C036D3BC20615A20007D145F /* ViewController.swift */,
 				C036D3BE20615A20007D145F /* Main.storyboard */,
+				C046455C206161D900BAFC7B /* view */,
 				C046454920615E8400BAFC7B /* music */,
+				C046455D206161E400BAFC7B /* images */,
 				C036D3C120615A20007D145F /* Assets.xcassets */,
 				C036D3C320615A20007D145F /* LaunchScreen.storyboard */,
 				C036D3C620615A20007D145F /* Info.plist */,
@@ -182,6 +184,20 @@
 				C046454C20615E8400BAFC7B /* AVMusicController.swift */,
 			);
 			path = music;
+			sourceTree = "<group>";
+		};
+		C046455C206161D900BAFC7B /* view */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = view;
+			sourceTree = "<group>";
+		};
+		C046455D206161E400BAFC7B /* images */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = images;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
