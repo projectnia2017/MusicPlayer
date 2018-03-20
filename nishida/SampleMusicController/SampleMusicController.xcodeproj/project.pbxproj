@@ -12,6 +12,10 @@
 		C0176CB92051739100994346 /* RealmSwift.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = C0176CB620516DF800994346 /* RealmSwift.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		C0176CBA2051739400994346 /* Realm.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = C0176CB420516DEA00994346 /* Realm.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		C0176CC12054D86B00994346 /* CustomUISegmentedControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0176CC02054D86B00994346 /* CustomUISegmentedControl.swift */; };
+		C036D3A820615054007D145F /* MusicController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C036D3A420615054007D145F /* MusicController.swift */; };
+		C036D3A920615054007D145F /* MusicDataController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C036D3A520615054007D145F /* MusicDataController.swift */; };
+		C036D3AA20615054007D145F /* AVMusicController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C036D3A620615054007D145F /* AVMusicController.swift */; };
+		C036D3AB20615054007D145F /* MusicItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = C036D3A720615054007D145F /* MusicItem.swift */; };
 		C081FA9520583602005383A0 /* DeployGateSDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C081FA9420583602005383A0 /* DeployGateSDK.framework */; };
 		C08B7D18204A44F600D777B7 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = C08B7D17204A44F600D777B7 /* AppDelegate.swift */; };
 		C08B7D1A204A44F600D777B7 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C08B7D19204A44F600D777B7 /* ViewController.swift */; };
@@ -20,9 +24,6 @@
 		C08B7D22204A44F600D777B7 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C08B7D20204A44F600D777B7 /* LaunchScreen.storyboard */; };
 		C08B7D2D204A44F600D777B7 /* SampleMusicControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C08B7D2C204A44F600D777B7 /* SampleMusicControllerTests.swift */; };
 		C08B7D38204A44F600D777B7 /* SampleMusicControllerUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C08B7D37204A44F600D777B7 /* SampleMusicControllerUITests.swift */; };
-		C08B7D46204A456F00D777B7 /* MusicController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C08B7D45204A456F00D777B7 /* MusicController.swift */; };
-		C08B7D48204CC66700D777B7 /* MusicDataController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C08B7D47204CC66700D777B7 /* MusicDataController.swift */; };
-		C08B7D4A204CCA3300D777B7 /* MusicItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = C08B7D49204CCA3300D777B7 /* MusicItem.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -70,6 +71,10 @@
 		C0176CB420516DEA00994346 /* Realm.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Realm.framework; path = "SampleMusicController/Realm/swift-4.0.2/Realm.framework"; sourceTree = "<group>"; };
 		C0176CB620516DF800994346 /* RealmSwift.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = RealmSwift.framework; path = "SampleMusicController/Realm/swift-4.0.2/RealmSwift.framework"; sourceTree = "<group>"; };
 		C0176CC02054D86B00994346 /* CustomUISegmentedControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomUISegmentedControl.swift; sourceTree = "<group>"; };
+		C036D3A420615054007D145F /* MusicController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MusicController.swift; sourceTree = "<group>"; };
+		C036D3A520615054007D145F /* MusicDataController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MusicDataController.swift; sourceTree = "<group>"; };
+		C036D3A620615054007D145F /* AVMusicController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AVMusicController.swift; sourceTree = "<group>"; };
+		C036D3A720615054007D145F /* MusicItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MusicItem.swift; sourceTree = "<group>"; };
 		C081FA9420583602005383A0 /* DeployGateSDK.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = DeployGateSDK.framework; path = SampleMusicController/DeployGate/DeployGateSDK.framework; sourceTree = "<group>"; };
 		C081FA962058363D005383A0 /* SampleMusicController-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "SampleMusicController-Bridging-Header.h"; sourceTree = "<group>"; };
 		C08B7D14204A44F600D777B7 /* SampleMusicController.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SampleMusicController.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -85,9 +90,6 @@
 		C08B7D33204A44F600D777B7 /* SampleMusicControllerUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SampleMusicControllerUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		C08B7D37204A44F600D777B7 /* SampleMusicControllerUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SampleMusicControllerUITests.swift; sourceTree = "<group>"; };
 		C08B7D39204A44F600D777B7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		C08B7D45204A456F00D777B7 /* MusicController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MusicController.swift; sourceTree = "<group>"; };
-		C08B7D47204CC66700D777B7 /* MusicDataController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MusicDataController.swift; sourceTree = "<group>"; };
-		C08B7D49204CCA3300D777B7 /* MusicItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MusicItem.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -128,6 +130,17 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		C036D3A320615054007D145F /* musiccontroller */ = {
+			isa = PBXGroup;
+			children = (
+				C036D3A720615054007D145F /* MusicItem.swift */,
+				C036D3A520615054007D145F /* MusicDataController.swift */,
+				C036D3A420615054007D145F /* MusicController.swift */,
+				C036D3A620615054007D145F /* AVMusicController.swift */,
+			);
+			path = musiccontroller;
+			sourceTree = "<group>";
+		};
 		C08B7D0B204A44F600D777B7 = {
 			isa = PBXGroup;
 			children = (
@@ -155,9 +168,7 @@
 				C08B7D17204A44F600D777B7 /* AppDelegate.swift */,
 				C08B7D19204A44F600D777B7 /* ViewController.swift */,
 				C0176CC02054D86B00994346 /* CustomUISegmentedControl.swift */,
-				C08B7D49204CCA3300D777B7 /* MusicItem.swift */,
-				C08B7D47204CC66700D777B7 /* MusicDataController.swift */,
-				C08B7D45204A456F00D777B7 /* MusicController.swift */,
+				C036D3A320615054007D145F /* musiccontroller */,
 				C08B7D1B204A44F600D777B7 /* Main.storyboard */,
 				C08B7D1E204A44F600D777B7 /* Assets.xcassets */,
 				C08B7D20204A44F600D777B7 /* LaunchScreen.storyboard */,
@@ -344,12 +355,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C08B7D4A204CCA3300D777B7 /* MusicItem.swift in Sources */,
+				C036D3AB20615054007D145F /* MusicItem.swift in Sources */,
 				C0176CC12054D86B00994346 /* CustomUISegmentedControl.swift in Sources */,
 				C08B7D1A204A44F600D777B7 /* ViewController.swift in Sources */,
+				C036D3A920615054007D145F /* MusicDataController.swift in Sources */,
 				C08B7D18204A44F600D777B7 /* AppDelegate.swift in Sources */,
-				C08B7D46204A456F00D777B7 /* MusicController.swift in Sources */,
-				C08B7D48204CC66700D777B7 /* MusicDataController.swift in Sources */,
+				C036D3A820615054007D145F /* MusicController.swift in Sources */,
+				C036D3AA20615054007D145F /* AVMusicController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

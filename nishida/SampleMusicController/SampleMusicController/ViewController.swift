@@ -180,7 +180,7 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
         songChanged = true
     }
     func setMediaItemInfo() {
-        let currentMediaItem = self.musicController.player.nowPlayingItem
+        let currentMediaItem = self.musicController.nowPlayingItem
         self.currentMediaItemTitle.text = currentMediaItem?.title
         self.currentMediaItemArtist.text = currentMediaItem?.artist
         self.currentMediaItemAlbum.text = currentMediaItem?.albumTitle
