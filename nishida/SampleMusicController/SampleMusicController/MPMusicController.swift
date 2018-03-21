@@ -121,7 +121,6 @@ class MPMusicController: MusicController {
                 self.writeSkipCountData()
             }
         }
-        
         self.player.skipToNextItem()
     }
     override func prev() {
