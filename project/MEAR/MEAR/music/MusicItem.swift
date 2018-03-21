@@ -1,8 +1,9 @@
 //
 //  MusicItem.swift
+//  MEAR
 //
-//  Created by yoshihiko on 2018/03/05.
-//  Copyright © 2018年 yoshihiko. All rights reserved.
+//  Created by yoshihiko on 2018/03/21.
+//  Copyright © 2018年 NIA. All rights reserved.
 //
 //  MusicDataController、MusicControllerで扱う、データのクラス定義
 //
@@ -55,13 +56,15 @@ class SongItem {
     var duration: String = ""
     var dateAddedString: String = ""
     var yearAddedString: String = ""
-
+    var isAppleMusicItem: Bool = false
+    
     //独自の再生情報データ
     var titleForSort: String = ""
     var lastPlayingDate: Date? =  nil
     var lastPlayingDateString: String =  ""
     var playCount: Int = 0
     var skipCount: Int = 0
+    
 }
 
 //MARK: - Realm
@@ -83,3 +86,9 @@ class PlayingDataItem: Object {
     @objc dynamic var playCount: Int = 0
     @objc dynamic var skipCount: Int = 0
 }
+class HistoryDataItem: Object {
+    @objc dynamic var title: String = ""
+    @objc dynamic var artist: String = ""
+    @objc dynamic var playingDate: Date? = nil
+}
+

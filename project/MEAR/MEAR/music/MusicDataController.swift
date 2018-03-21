@@ -1,8 +1,9 @@
 //
 //  MusicDataController.swift
+//  MEAR
 //
-//  Created by yoshihiko on 2018/03/05.
-//  Copyright © 2018年 yoshihiko. All rights reserved.
+//  Created by yoshihiko on 2018/03/21.
+//  Copyright © 2018年 NIA. All rights reserved.
 //
 //  MPMediaQueryからのデータ取得、再生リスト作成、独自データの処理
 //
@@ -20,7 +21,7 @@ class MusicDataController: NSObject, AVAudioPlayerDelegate  {
         var id:Int
         var rate:Int
     }
-
+    
     //MARK: - 定義
     //定数
     public enum SortType {
@@ -175,7 +176,7 @@ class MusicDataController: NSObject, AVAudioPlayerDelegate  {
             if albumDataItem != nil {
                 if albumDataItem?.lastPlayingDate != nil {
                     item.lastPlayingDate = (albumDataItem?.lastPlayingDate) ?? nil
-
+                    
                     formatter.dateFormat = "yyyy/MM/dd"
                     item.lastPlayingDateString = formatter.string(from: item.lastPlayingDate!)
                 }
@@ -225,7 +226,7 @@ class MusicDataController: NSObject, AVAudioPlayerDelegate  {
      */
     func getSongsWithPlaylist(id: Int,
                               sortType:SortType = SortType.DEFAULT,
-                              sortOrder:SortOrder = SortOrder.ASCENDING) -> Array<SongItem>{
+                              sortOrder:SortOrder = SortOrder.ASCENDING, contentAppleMusicItem:Bool = true) -> Array<SongItem>{
         //クエリー取得
         let playlistQuery = MPMediaQuery.playlists()
         playlistQuery.addFilterPredicate(MPMediaPropertyPredicate(value: false, forProperty: MPMediaItemPropertyIsCloudItem))
@@ -233,10 +234,10 @@ class MusicDataController: NSObject, AVAudioPlayerDelegate  {
         let playlist:MPMediaItemCollection = playlistCollections![id]
         
         //曲リスト作成
-        let songList:Array<SongItem> = createSongList(collection: playlist)
+        let songList:Array<SongItem> = self.createSongList(collection: playlist, contentAppleMusicItem: contentAppleMusicItem)
         
         //ソート
-        let sortedList:Array<SongItem> = sortSongList(songList: songList, sortType: sortType, sortOrder: sortOrder)
+        let sortedList:Array<SongItem> = self.sortSongList(songList: songList, sortType: sortType, sortOrder: sortOrder)
         
         return sortedList
     }
@@ -249,17 +250,18 @@ class MusicDataController: NSObject, AVAudioPlayerDelegate  {
      */
     func getSongsWithAlbum(id: Int,
                            sortType:SortType = SortType.DEFAULT,
-                           sortOrder:SortOrder = SortOrder.ASCENDING) -> Array<SongItem>{
+                           sortOrder:SortOrder = SortOrder.ASCENDING,
+                           contentAppleMusicItem:Bool = true) -> Array<SongItem>{
         //クエリー取得
         let albumQuery = MPMediaQuery.albums()
         let albumCollections = albumQuery.collections
         let album:MPMediaItemCollection = albumCollections![id]
         
         //曲リスト作成
-        let songList:Array<SongItem> = createSongList(collection: album)
+        let songList:Array<SongItem> = self.createSongList(collection: album, contentAppleMusicItem: contentAppleMusicItem)
         
         //ソート
-        let sortedList:Array<SongItem> = sortSongList(songList: songList, sortType: sortType, sortOrder: sortOrder)
+        let sortedList:Array<SongItem> = self.sortSongList(songList: songList, sortType: sortType, sortOrder: sortOrder)
         
         return sortedList
     }
@@ -270,124 +272,182 @@ class MusicDataController: NSObject, AVAudioPlayerDelegate  {
      - returns: SongItemの配列
      */
     func getSongsWithAll(sortType:SortType = SortType.DEFAULT,
-                         sortOrder:SortOrder = SortOrder.ASCENDING) -> Array<SongItem>{
+                         sortOrder:SortOrder = SortOrder.ASCENDING,
+                         contentAppleMusicItem:Bool = true) -> Array<SongItem>{
         //クエリー取得
         let albumQuery = MPMediaQuery.albums()
         let albumCollections = albumQuery.collections
         
-        let filterdAlbumDataItems: Results<AlbumDataItem>? = getFilterdAlbumDataItems()
+        let filteredAlbumDataItems: Results<AlbumDataItem>? = self.getFilterdAlbumDataItems()
         
         var songList:Array<SongItem> = []
         
         for album in albumCollections! {
-            songList += createSongList(collection: album, startId: songList.count, filteredAlbumDataItems: filterdAlbumDataItems)
+            songList += self.createSongList(collection: album, contentAppleMusicItem:contentAppleMusicItem, startId: songList.count, filteredAlbumDataItems: filteredAlbumDataItems)
         }
         
         //ソート
-        let sortedList:Array<SongItem> = sortSongList(songList: songList, sortType: sortType, sortOrder: sortOrder)
+        let sortedList:Array<SongItem> = self.sortSongList(songList: songList, sortType: sortType, sortOrder: sortOrder)
         
         return sortedList
     }
-    
-    //MARK: - 共通
-    //曲リスト作成
-    private func createSongList(collection: MPMediaItemCollection,
-                                startId: Int = 0,
-                                filteredAlbumDataItems: Results<AlbumDataItem>? = nil ) -> Array<SongItem>{
-        let formatter = DateFormatter()
+    /**
+     再生履歴を取得
+     - returns: SongItemの配列, 日付のindex
+     */
+    func getRecentSongs(contentAppleMusicItem:Bool = true) -> Array<SongItem> {
         
+        let recentPlayingDataItems: Results<PlayingDataItem>? = self.getRecentPlayingData()
+        //let filteredAlbumDataItems: Results<AlbumDataItem>? = self.getFilterdAlbumDataItems()
+        
+        var songId: Int = 0;
         var songList:Array<SongItem> = []
         
-        var songId: Int = startId
-        
-        for_i: for song in collection.items {
+        for playingDataItem:PlayingDataItem in recentPlayingDataItems! {
             
-            //設定したアルバムをフィルタリング
-            if filteredAlbumDataItems != nil {
-                for_j: for filter in filteredAlbumDataItems! {
-                    if song.albumTitle == filter.title && song.artist == filter.artist {
-                        break for_i
-                    }
-                }
-            }
-            
-            //クラウド上の曲をフィルタリング
             let songQuery = MPMediaQuery.songs()
             songQuery.addFilterPredicate(MPMediaPropertyPredicate(value: false, forProperty: MPMediaItemPropertyIsCloudItem))
-            songQuery.addFilterPredicate(MPMediaPropertyPredicate(value: song.title, forProperty: MPMediaItemPropertyTitle, comparisonType: MPMediaPredicateComparison.contains))
-            songQuery.addFilterPredicate(MPMediaPropertyPredicate(value: song.artist, forProperty: MPMediaItemPropertyArtist, comparisonType: MPMediaPredicateComparison.contains))
-
+            songQuery.addFilterPredicate(MPMediaPropertyPredicate(value: playingDataItem.title, forProperty: MPMediaItemPropertyTitle, comparisonType: MPMediaPredicateComparison.contains))
+            songQuery.addFilterPredicate(MPMediaPropertyPredicate(value: playingDataItem.artist, forProperty: MPMediaItemPropertyArtist, comparisonType: MPMediaPredicateComparison.contains))
+            
             if songQuery.collections?.count == 0 {
-                break for_i
+                continue
+            }
+            
+            let mediaItem:MPMediaItem = (songQuery.collections!.first?.items[0])!
+            
+            if mediaItem.assetURL == nil && contentAppleMusicItem == false {
+                continue
             }
             
             //SongItemを作成
-            let item = SongItem()
-            item.id = songId
-            item.title = song.value(forProperty: MPMediaItemPropertyTitle) as! String
-            item.artist = song.value(forProperty: MPMediaItemPropertyArtist) as! String
-            item.albumTitle = song.value(forProperty: MPMediaItemPropertyAlbumTitle) as! String
-            item.trackNumber = song.value(forProperty: MPMediaItemPropertyAlbumTrackNumber) as! Int
+            let sontItem = self.createSongItem(id: songId, mediaItem: mediaItem)
+            sontItem.lastPlayingDate = playingDataItem.lastPlayingDate
+            sontItem.playCount = playingDataItem.playCount
+            sontItem.skipCount = playingDataItem.skipCount
             
-            if song.assetURL != nil {
-                //追加日
-                item.dateAdded = song.value(forProperty: MPMediaItemPropertyDateAdded) as? Date
-            } else {
-                //AppleMusicから購入した場合はdateAddedがないため、releaseDate
-                item.dateAdded = song.value(forProperty: MPMediaItemPropertyReleaseDate) as? Date
-            }
-            if item.dateAdded == nil {
-                item.dateAdded = Date()
-            }
-            
-            item.artwork = song.value(forProperty: MPMediaItemPropertyArtwork) as? MPMediaItemArtwork
-            
-            item.mediaItem = song
-            
-            //独自情報設定
-            //ソート用に全角記号と"を無視
-            item.titleForSort = item.title
-            item.titleForSort = item.titleForSort.replacingOccurrences(of: "[\\p{S}]", with: "0", options: NSString.CompareOptions.regularExpression, range: nil)
-            item.titleForSort = item.titleForSort.replacingOccurrences(of: "\"", with: "", options: NSString.CompareOptions.regularExpression, range: nil)
-            
-            //曲の時間
-            let minutes = Int(round(song.playbackDuration) / 60)
-            let seconds = Int(round(song.playbackDuration).truncatingRemainder(dividingBy: 60))
-            item.duration = "\(NSString(format: "%02d", minutes)):\(NSString(format: "%02d", seconds))"
-            
-            //曲の追加日、追加年
-            formatter.dateFormat = "yyyy/MM/dd"
-            item.dateAddedString = formatter.string(from: item.dateAdded!)
-            
-            formatter.dateFormat = "yyyy"
-            item.yearAddedString = formatter.string(from: item.dateAdded!)
-            
-            //Realmデータベースから再生情報を取得
-            let playingDataItem:PlayingDataItem? = searchPlayingDataItem(title: item.title, artist: item.artist)
-            if playingDataItem != nil {
-                //最終再生日時
-                item.lastPlayingDate = (playingDataItem?.lastPlayingDate)!
-                
-                formatter.dateFormat = "yyyy/MM/dd"
-                item.lastPlayingDateString = formatter.string(from: item.lastPlayingDate!)
-                
-                item.playCount = (playingDataItem?.playCount)!
-                item.skipCount = (playingDataItem?.skipCount)!
-                
-            } else {
-                item.lastPlayingDate = Date()
-                formatter.dateFormat = "yyyy/MM/dd"
-                item.lastPlayingDateString = formatter.string(from: item.lastPlayingDate!)
-                item.playCount = 0
-                item.skipCount = 0
-            }
-            
-            songList.append(item)
+            songList.append(sontItem)
             songId += 1
         }
         
         return songList
     }
+    
+    //MARK: - 共通
+    //曲リスト作成
+    private func createSongList(collection: MPMediaItemCollection,
+                                contentAppleMusicItem:Bool = true,
+                                startId: Int = 0,
+                                filteredAlbumDataItems: Results<AlbumDataItem>? = nil) -> Array<SongItem>{
+        let formatter = DateFormatter()
+        
+        var songId: Int = startId
+        var songList:Array<SongItem> = []
+        
+        for_i: for mediaItem in collection.items {
+            
+            //設定したアルバムをフィルタリング
+            if filteredAlbumDataItems != nil {
+                for_j: for filter in filteredAlbumDataItems! {
+                    if mediaItem.albumTitle == filter.title && mediaItem.artist == filter.artist {
+                        continue for_i
+                    }
+                }
+            }
+            
+            //AppleMusicの曲をフィルタリング
+            if mediaItem.assetURL == nil && contentAppleMusicItem == false {
+                continue
+            }
+            
+            //クラウド上の曲をフィルタリング
+            let songQuery = MPMediaQuery.songs()
+            songQuery.addFilterPredicate(MPMediaPropertyPredicate(value: false, forProperty: MPMediaItemPropertyIsCloudItem))
+            songQuery.addFilterPredicate(MPMediaPropertyPredicate(value: mediaItem.title, forProperty: MPMediaItemPropertyTitle, comparisonType: MPMediaPredicateComparison.contains))
+            songQuery.addFilterPredicate(MPMediaPropertyPredicate(value: mediaItem.artist, forProperty: MPMediaItemPropertyArtist, comparisonType: MPMediaPredicateComparison.contains))
+            
+            if songQuery.collections?.count == 0 {
+                continue
+            }
+            
+            //SongItemを作成
+            let songItem = self.createSongItem(id: songId, mediaItem: mediaItem)
+            
+            //Realmデータベースから再生情報を取得
+            let playingDataItem:PlayingDataItem? = searchPlayingDataItem(title: songItem.title, artist: songItem.artist)
+            if playingDataItem != nil {
+                //最終再生日時
+                songItem.lastPlayingDate = (playingDataItem?.lastPlayingDate)!
+                
+                formatter.dateFormat = "yyyy/MM/dd"
+                songItem.lastPlayingDateString = formatter.string(from: songItem.lastPlayingDate!)
+                
+                songItem.playCount = (playingDataItem?.playCount)!
+                songItem.skipCount = (playingDataItem?.skipCount)!
+                
+            } else {
+                songItem.lastPlayingDate = Date()
+                formatter.dateFormat = "yyyy/MM/dd"
+                songItem.lastPlayingDateString = formatter.string(from: songItem.lastPlayingDate!)
+                songItem.playCount = 0
+                songItem.skipCount = 0
+            }
+            
+            songList.append(songItem)
+            songId += 1
+        }
+        
+        return songList
+    }
+    private func createSongItem(id: Int, mediaItem: MPMediaItem) -> SongItem{
+        let formatter = DateFormatter()
+        
+        //SongItemを作成
+        let item = SongItem()
+        
+        item.id = id
+        item.title = mediaItem.value(forProperty: MPMediaItemPropertyTitle) as! String
+        item.artist = mediaItem.value(forProperty: MPMediaItemPropertyArtist) as! String
+        item.albumTitle = mediaItem.value(forProperty: MPMediaItemPropertyAlbumTitle) as! String
+        item.trackNumber = mediaItem.value(forProperty: MPMediaItemPropertyAlbumTrackNumber) as! Int
+        
+        if mediaItem.assetURL != nil {
+            //追加日
+            item.dateAdded = mediaItem.value(forProperty: MPMediaItemPropertyDateAdded) as? Date
+        } else {
+            //AppleMusicから購入した場合はdateAddedがないため、releaseDateを割り当て
+            item.isAppleMusicItem = true
+            item.dateAdded = mediaItem.value(forProperty: MPMediaItemPropertyReleaseDate) as? Date
+        }
+        if item.dateAdded == nil {
+            item.dateAdded = Date()
+        }
+        
+        item.artwork = mediaItem.value(forProperty: MPMediaItemPropertyArtwork) as? MPMediaItemArtwork
+        
+        item.mediaItem = mediaItem
+        
+        //独自情報設定
+        //ソート用に全角記号と"を無視
+        item.titleForSort = item.title
+        item.titleForSort = item.titleForSort.replacingOccurrences(of: "[\\p{S}]", with: "0", options: NSString.CompareOptions.regularExpression, range: nil)
+        item.titleForSort = item.titleForSort.replacingOccurrences(of: "\"", with: "", options: NSString.CompareOptions.regularExpression, range: nil)
+        
+        //曲の時間
+        let minutes = Int(round(mediaItem.playbackDuration) / 60)
+        let seconds = Int(round(mediaItem.playbackDuration).truncatingRemainder(dividingBy: 60))
+        item.duration = "\(NSString(format: "%02d", minutes)):\(NSString(format: "%02d", seconds))"
+        
+        //曲の追加日、追加年
+        formatter.dateFormat = "yyyy/MM/dd"
+        item.dateAddedString = formatter.string(from: item.dateAdded!)
+        
+        formatter.dateFormat = "yyyy"
+        item.yearAddedString = formatter.string(from: item.dateAdded!)
+        
+        return item
+    }
+    
     /**
      曲リストのソート
      - parameter songList: 曲リスト
@@ -396,8 +456,8 @@ class MusicDataController: NSObject, AVAudioPlayerDelegate  {
      - returns: SongItemの配列
      */
     func sortSongList(songList: Array<SongItem>,
-                              sortType:SortType = SortType.DEFAULT,
-                              sortOrder:SortOrder = SortOrder.ASCENDING) -> Array<SongItem>{
+                      sortType:SortType = SortType.DEFAULT,
+                      sortOrder:SortOrder = SortOrder.ASCENDING) -> Array<SongItem>{
         //シャッフルではなかった場合、シャッフルカウントをリセット
         if sortType != SortType.SHUFFLE {
             self.shuffleCount = 0
@@ -538,7 +598,7 @@ class MusicDataController: NSObject, AVAudioPlayerDelegate  {
     }
     
     //MARK: - Realmデータベース
-    //データ
+    //データ取得
     private func searchPlaylistDataItem(title: String) -> PlaylistDataItem?{
         let realm = try! Realm()
         let items = realm.objects(PlaylistDataItem.self).filter("title == %@", title)
@@ -565,6 +625,21 @@ class MusicDataController: NSObject, AVAudioPlayerDelegate  {
         
         if items.count > 0 {
             return items.first
+        } else {
+            return nil
+        }
+    }
+    private func getRecentPlayingData(date:Date? = nil) -> Results<PlayingDataItem>?{
+        let realm = try! Realm()
+        var items: Results<PlayingDataItem>
+        if date != nil {
+            items = realm.objects(PlayingDataItem.self).filter("lastPlayingDate > %d", date!).sorted(byKeyPath: "lastPlayingDate", ascending: false)
+        } else {
+            items = realm.objects(PlayingDataItem.self).sorted(byKeyPath: "lastPlayingDate", ascending: false)
+        }
+        
+        if items.count > 0 {
+            return items
         } else {
             return nil
         }
@@ -607,3 +682,4 @@ class MusicDataController: NSObject, AVAudioPlayerDelegate  {
         }
     }
 }
+

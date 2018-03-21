@@ -278,6 +278,7 @@ class MusicController: NSObject {
         //Realmへ書き込み
         if self.player.nowPlayingItem != nil {
             writePlayingDataItem()
+            writeHistoryDataItem()
         }
         
         //カウントリピート
@@ -330,10 +331,9 @@ class MusicController: NSObject {
     
     //MARK: - Realmデータベース
     private func writePlayingDataItem() {
-        //Realmへ書き込み
         let realm = try! Realm()
-        let title: String = self.player.nowPlayingItem!.title!
-        let artist: String = self.player.nowPlayingItem!.artist!
+        let title: String = self.nowPlayingItem!.title!
+        let artist: String = self.nowPlayingItem!.artist!
         let now = Date()
         
         let history = realm.objects(PlayingDataItem.self).filter("title == %@ && artist == %@", title, artist)
@@ -354,10 +354,9 @@ class MusicController: NSObject {
         }
     }
     private func writeSkipCountData() {
-        //Realmへ書き込み
         let realm = try! Realm()
-        let title: String = self.player.nowPlayingItem!.title!
-        let artist: String = self.player.nowPlayingItem!.artist!
+        let title: String = self.nowPlayingItem!.title!
+        let artist: String = self.nowPlayingItem!.artist!
         let now = Date()
         let history = realm.objects(PlayingDataItem.self).filter("title == %@ && artist == %@", title, artist)
         
@@ -374,6 +373,18 @@ class MusicController: NSObject {
                     realm.add(PlayingDataItem(value: ["title": title, "artist": artist, "lastPlayingDate": now, "playCount": 0, "skipCount": 1]))
                 }
             }
+        }
+    }
+    private func writeHistoryDataItem() {
+        let realm = try! Realm()
+        
+        let historyData: HistoryDataItem = HistoryDataItem()
+        historyData.title = self.nowPlayingItem!.title!
+        historyData.artist = self.nowPlayingItem!.artist!
+        historyData.playingDate = Date()
+        
+        try! realm.write {
+            realm.add(historyData)
         }
     }
 }

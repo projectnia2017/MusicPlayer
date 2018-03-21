@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import RealmSwift
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -19,6 +20,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         //DeployGate
         DeployGateSDK.sharedInstance().launchApplication(withAuthor: "ProjectNIA", key: "d567665c1068c991e406533aeda9bcb615a69037")
+        
+        //Realm migration
+        let config = Realm.Configuration(
+            schemaVersion: 1,
+            migrationBlock: { migration, oldSchemaVersion in
+                if (oldSchemaVersion < 1) {}
+        })
+        Realm.Configuration.defaultConfiguration = config
         
         return true
     }

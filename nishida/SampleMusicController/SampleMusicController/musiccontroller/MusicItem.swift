@@ -55,6 +55,7 @@ class SongItem {
     var duration: String = ""
     var dateAddedString: String = ""
     var yearAddedString: String = ""
+    var isAppleMusicItem: Bool = false
 
     //独自の再生情報データ
     var titleForSort: String = ""
@@ -82,4 +83,9 @@ class PlayingDataItem: Object {
     @objc dynamic var lastPlayingDate: Date? = nil
     @objc dynamic var playCount: Int = 0
     @objc dynamic var skipCount: Int = 0
+}
+class HistoryDataItem: Object {
+    @objc dynamic var title: String = ""
+    @objc dynamic var artist: String = ""
+    @objc dynamic var playingDate: Date? = nil
 }

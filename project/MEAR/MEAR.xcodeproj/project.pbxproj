@@ -23,6 +23,7 @@
 		C046455020615E8400BAFC7B /* AVMusicController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C046454C20615E8400BAFC7B /* AVMusicController.swift */; };
 		C046455120615E8400BAFC7B /* MusicItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = C046454D20615E8400BAFC7B /* MusicItem.swift */; };
 		C046455720615F9C00BAFC7B /* DeployGateSDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C046455620615F9C00BAFC7B /* DeployGateSDK.framework */; };
+		C046455F2061D30600BAFC7B /* MPMusicController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C046455E2061D30600BAFC7B /* MPMusicController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -79,6 +80,7 @@
 		C046454D20615E8400BAFC7B /* MusicItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MusicItem.swift; sourceTree = "<group>"; };
 		C046455620615F9C00BAFC7B /* DeployGateSDK.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = DeployGateSDK.framework; path = Frameworks/DeployGateSDK.framework; sourceTree = "<group>"; };
 		C046455820615FEA00BAFC7B /* MEAR-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MEAR-Bridging-Header.h"; sourceTree = "<group>"; };
+		C046455E2061D30600BAFC7B /* MPMusicController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MPMusicController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -181,6 +183,7 @@
 				C046454D20615E8400BAFC7B /* MusicItem.swift */,
 				C046454B20615E8400BAFC7B /* MusicDataController.swift */,
 				C046454A20615E8400BAFC7B /* MusicController.swift */,
+				C046455E2061D30600BAFC7B /* MPMusicController.swift */,
 				C046454C20615E8400BAFC7B /* AVMusicController.swift */,
 			);
 			path = music;
@@ -358,6 +361,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C046455F2061D30600BAFC7B /* MPMusicController.swift in Sources */,
 				C046455120615E8400BAFC7B /* MusicItem.swift in Sources */,
 				C036D3BD20615A20007D145F /* ViewController.swift in Sources */,
 				C036D3BB20615A20007D145F /* AppDelegate.swift in Sources */,
