@@ -16,6 +16,7 @@
 		C036D3A920615054007D145F /* MusicDataController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C036D3A520615054007D145F /* MusicDataController.swift */; };
 		C036D3AA20615054007D145F /* AVMusicController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C036D3A620615054007D145F /* AVMusicController.swift */; };
 		C036D3AB20615054007D145F /* MusicItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = C036D3A720615054007D145F /* MusicItem.swift */; };
+		C046456120621B7700BAFC7B /* MPMusicController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C046456020621B7700BAFC7B /* MPMusicController.swift */; };
 		C081FA9520583602005383A0 /* DeployGateSDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C081FA9420583602005383A0 /* DeployGateSDK.framework */; };
 		C08B7D18204A44F600D777B7 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = C08B7D17204A44F600D777B7 /* AppDelegate.swift */; };
 		C08B7D1A204A44F600D777B7 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C08B7D19204A44F600D777B7 /* ViewController.swift */; };
@@ -75,6 +76,7 @@
 		C036D3A520615054007D145F /* MusicDataController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MusicDataController.swift; sourceTree = "<group>"; };
 		C036D3A620615054007D145F /* AVMusicController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AVMusicController.swift; sourceTree = "<group>"; };
 		C036D3A720615054007D145F /* MusicItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MusicItem.swift; sourceTree = "<group>"; };
+		C046456020621B7700BAFC7B /* MPMusicController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MPMusicController.swift; sourceTree = "<group>"; };
 		C081FA9420583602005383A0 /* DeployGateSDK.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = DeployGateSDK.framework; path = SampleMusicController/DeployGate/DeployGateSDK.framework; sourceTree = "<group>"; };
 		C081FA962058363D005383A0 /* SampleMusicController-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "SampleMusicController-Bridging-Header.h"; sourceTree = "<group>"; };
 		C08B7D14204A44F600D777B7 /* SampleMusicController.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SampleMusicController.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -130,17 +132,6 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
-		C036D3A320615054007D145F /* musiccontroller */ = {
-			isa = PBXGroup;
-			children = (
-				C036D3A720615054007D145F /* MusicItem.swift */,
-				C036D3A520615054007D145F /* MusicDataController.swift */,
-				C036D3A420615054007D145F /* MusicController.swift */,
-				C036D3A620615054007D145F /* AVMusicController.swift */,
-			);
-			path = musiccontroller;
-			sourceTree = "<group>";
-		};
 		C08B7D0B204A44F600D777B7 = {
 			isa = PBXGroup;
 			children = (
@@ -168,7 +159,11 @@
 				C08B7D17204A44F600D777B7 /* AppDelegate.swift */,
 				C08B7D19204A44F600D777B7 /* ViewController.swift */,
 				C0176CC02054D86B00994346 /* CustomUISegmentedControl.swift */,
-				C036D3A320615054007D145F /* musiccontroller */,
+				C036D3A720615054007D145F /* MusicItem.swift */,
+				C036D3A520615054007D145F /* MusicDataController.swift */,
+				C036D3A420615054007D145F /* MusicController.swift */,
+				C046456020621B7700BAFC7B /* MPMusicController.swift */,
+				C036D3A620615054007D145F /* AVMusicController.swift */,
 				C08B7D1B204A44F600D777B7 /* Main.storyboard */,
 				C08B7D1E204A44F600D777B7 /* Assets.xcassets */,
 				C08B7D20204A44F600D777B7 /* LaunchScreen.storyboard */,
@@ -359,6 +354,7 @@
 				C0176CC12054D86B00994346 /* CustomUISegmentedControl.swift in Sources */,
 				C08B7D1A204A44F600D777B7 /* ViewController.swift in Sources */,
 				C036D3A920615054007D145F /* MusicDataController.swift in Sources */,
+				C046456120621B7700BAFC7B /* MPMusicController.swift in Sources */,
 				C08B7D18204A44F600D777B7 /* AppDelegate.swift in Sources */,
 				C036D3A820615054007D145F /* MusicController.swift in Sources */,
 				C036D3AA20615054007D145F /* AVMusicController.swift in Sources */,

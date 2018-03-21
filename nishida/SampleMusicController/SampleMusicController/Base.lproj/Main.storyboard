@@ -93,34 +93,6 @@
                                     <action selector="repeartSegmentedControlChanged:" destination="BYZ-38-t0r" eventType="valueChanged" id="rmJ-2H-Jgc"/>
                                 </connections>
                             </segmentedControl>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="99" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="zKa-fX-cz6">
-                                <rect key="frame" x="221" y="538" width="36" height="21"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                <nil key="textColor"/>
-                                <nil key="highlightedColor"/>
-                            </label>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="/" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="HAR-BB-FMt">
-                                <rect key="frame" x="204" y="538" width="25" height="21"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                <nil key="textColor"/>
-                                <nil key="highlightedColor"/>
-                            </label>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="1" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="QAl-u8-ndC">
-                                <rect key="frame" x="175" y="538" width="33" height="21"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                <nil key="textColor"/>
-                                <nil key="highlightedColor"/>
-                            </label>
-                            <stepper opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="3" minimumValue="1" maximumValue="999" translatesAutoresizingMaskIntoConstraints="NO" id="LJu-y4-2jk">
-                                <rect key="frame" x="265" y="535" width="94" height="29"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <connections>
-                                    <action selector="repeatCountStepperChanged:" destination="BYZ-38-t0r" eventType="valueChanged" id="Y1F-lI-3UY"/>
-                                </connections>
-                            </stepper>
                             <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="ElK-X4-h2b">
                                 <rect key="frame" x="44" y="396" width="80" height="80"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
@@ -165,9 +137,6 @@
                         <outlet property="musicControlToolbar" destination="zVT-gv-noW" id="kKJ-RK-4Jf"/>
                         <outlet property="musicPicker" destination="chl-To-YAc" id="gGV-jT-o9n"/>
                         <outlet property="playlistPicker" destination="Uzt-zY-6zh" id="tR2-YP-2wX"/>
-                        <outlet property="repeatCountLabel" destination="zKa-fX-cz6" id="LQz-7f-XUm"/>
-                        <outlet property="repeatCountStepper" destination="LJu-y4-2jk" id="DpW-qE-I8Q"/>
-                        <outlet property="repeatCurrentCountLabel" destination="QAl-u8-ndC" id="BmC-4y-zAV"/>
                         <outlet property="sortTypeControl" destination="myb-8m-9uL" id="b2j-O0-KcB"/>
                     </connections>
                 </viewController>

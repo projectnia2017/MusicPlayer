@@ -1,8 +1,9 @@
 //
 //  MusicDataController.swift
+//  MEAR
 //
-//  Created by yoshihiko on 2018/03/05.
-//  Copyright © 2018年 yoshihiko. All rights reserved.
+//  Created by yoshihiko on 2018/03/21.
+//  Copyright © 2018年 NIA. All rights reserved.
 //
 //  MPMediaQueryからのデータ取得、再生リスト作成、独自データの処理
 //

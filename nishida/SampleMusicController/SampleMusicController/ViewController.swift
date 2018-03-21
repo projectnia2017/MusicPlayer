@@ -15,7 +15,7 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
     
     //MARK: - privateプロパティ
     private let musicDataController = MusicDataController.shared
-    private let musicController = MusicController.shared
+    private let musicController = MPMusicController.shared
     
     private var playlists: Array<PlaylistItem> = []
     private var currentSongList: Array<SongItem> = []
@@ -37,11 +37,7 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
     @IBOutlet weak var sortTypeControl: UISegmentedControl!
     @IBOutlet weak var musicPicker: UIPickerView!
     
-    @IBOutlet weak var repeatCountStepper: UIStepper!
-    @IBOutlet weak var repeatCountLabel: UILabel!
-    @IBOutlet weak var repeatCurrentCountLabel: UILabel!
     @IBOutlet weak var currentMediaItemArtwork: UIImageView!
-    
     @IBOutlet weak var currentMediaItemTitle: UILabel!
     @IBOutlet weak var currentMediaItemArtist: UILabel!
     @IBOutlet weak var currentMediaItemAlbum: UILabel!
@@ -85,10 +81,6 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
         if UserDefaults.standard.object(forKey: "repeatCount") != nil {
             self.repeatCount = UserDefaults.standard.integer(forKey: "repeatCount")
         }
-        
-        //UI初期化
-        self.repeatCountStepper.value = Double(self.repeatCount)
-        self.repeatCountLabel.text = String(Int(self.repeatCountStepper.value))
         
         //メディア利用の許可確認
         MPMediaLibrary.requestAuthorization { (status) in
@@ -236,11 +228,11 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
         }
     }
     @IBAction func repeatCountStepperChanged(_ sender: UIStepper) {
-        self.musicController.setRepeatCount(count: Int(sender.value))
-        self.repeatCountLabel.text = String(Int(sender.value))
-        
-        //UserDefaultsに保存
-        UserDefaults.standard.set(Int(sender.value) , forKey: "repeatCount")
+//        self.musicController.setRepeatCount(count: Int(sender.value))
+//        self.repeatCountLabel.text = String(Int(sender.value))
+//
+//        //UserDefaultsに保存
+//        UserDefaults.standard.set(Int(sender.value) , forKey: "repeatCount")
     }
     
     //toolbar
@@ -327,7 +319,7 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
         setMediaItemInfo()
     }
     @objc func repeatCountChanged(notification: NSNotification?) {
-        self.repeatCurrentCountLabel.text =  String(self.musicController.currentCount)
+        //self.repeatCurrentCountLabel.text =  String(self.musicController.currentCount)
     }
     
     

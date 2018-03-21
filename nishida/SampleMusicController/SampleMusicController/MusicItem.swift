@@ -1,8 +1,9 @@
 //
 //  MusicItem.swift
+//  MEAR
 //
-//  Created by yoshihiko on 2018/03/05.
-//  Copyright © 2018年 yoshihiko. All rights reserved.
+//  Created by yoshihiko on 2018/03/21.
+//  Copyright © 2018年 NIA. All rights reserved.
 //
 //  MusicDataController、MusicControllerで扱う、データのクラス定義
 //
