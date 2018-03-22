@@ -135,6 +135,8 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
     func setMusicFromPlaylist(playlistId: Int) {
         let sortType:MusicDataController.SortType = musicDataController.SortTypeListSong[self.sortTypeControl.selectedSegmentIndex]
         
+        let test = musicDataController.getPlayingHistory()
+        
         //プレイリスト内の曲の取得
         self.currentSongList = musicDataController.getSongsWithPlaylist(id: playlistId, sortType: sortType)
         

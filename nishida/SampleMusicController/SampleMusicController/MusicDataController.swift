@@ -356,6 +356,7 @@ class MusicDataController: NSObject, AVAudioPlayerDelegate  {
         var sectionList: Array<Int> = []
         var prevPlayingDate: String = ""
         var sectionId: Int = -1
+        var songListInSection: Array<SongItem> = []
         
         for hisotryDataItem:HistoryDataItem in playingHistoryDataItems! {
             
@@ -396,21 +397,46 @@ class MusicDataController: NSObject, AVAudioPlayerDelegate  {
                 songItem.skipCount = 0
             }
             
-            songList.append(songItem)
-            songId += 1
-            prevMediaItem = mediaItem
-            
-            //インデックスとセクションを作成
+            //セクションが変わる際の処理
             if songItem.lastPlayingDateString != prevPlayingDate {
+                //インデックスを作成
                 indexList.append(songItem.lastPlayingDateString)
                 sectionId += 1
                 sectionList.append(1)
+                
+                //1日単位で順序を時系列に反転
+                songListInSection.reverse()
+                let count = Int(songListInSection.count / 2)
+                for i in 0..<count {
+                    let tempId = songListInSection[i].id
+                    songListInSection[i].id = songListInSection[(songListInSection.count-1)-i].id
+                    songListInSection[(songListInSection.count-1)-i].id = tempId
+                }
+                songList.append(contentsOf: songListInSection)
+                songListInSection.removeAll()
+                
             } else {
                 sectionList[sectionId] += 1
             }
             
+            songListInSection.append(songItem)
+            
+            songId += 1
+            
+            prevMediaItem = mediaItem
             prevPlayingDate = songItem.lastPlayingDateString
         }
+        
+        //最後に一度実行
+        songListInSection.reverse()
+        let count = Int(songListInSection.count / 2)
+        for i in 0..<count {
+            let tempId = songListInSection[i].id
+            songListInSection[i].id = songListInSection[(songListInSection.count-1)-i].id
+            songListInSection[(songListInSection.count-1)-i].id = tempId
+        }
+        songList.append(contentsOf: songListInSection)
+        sectionList[sectionId] -= 1
         
         return (songList, indexList, sectionList)
     }
