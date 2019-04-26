@@ -28,6 +28,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 if (oldSchemaVersion < 1) {}
         })
         Realm.Configuration.defaultConfiguration = config
+   
+        // NavigationBar 下線削除
+        UINavigationBar.appearance().shadowImage = UIImage()
         
         return true
     }

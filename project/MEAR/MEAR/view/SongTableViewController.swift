@@ -14,8 +14,6 @@ class SongTableViewController: UIViewController,UITableViewDelegate,UITableViewD
     
     @IBOutlet weak var segmentedControl: UISegmentedControl!
     
-    var playlistTitle :String = ""
-    
     private let musicDataController = MusicDataController.shared
     private let musicController: MusicController = AVMusicController.shared
     
@@ -26,12 +24,10 @@ class SongTableViewController: UIViewController,UITableViewDelegate,UITableViewD
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        self.navigationItem.title = playlistTitle
-        
         self.tableView.register(UINib(nibName: "SongTableViewCell", bundle: nil), forCellReuseIdentifier: "SongTableViewCell")
         
         // プレイリスト内の曲一覧を取得
-        self.currentSongList = musicDataController.getSongsWithPlaylist(id: self.receiveId, sortType: MusicDataController.SortType.DEFAULT)
+        self.currentSongList = musicDataController.getSongsWithPlaylist(id: self.receiveId, sortType: MusicDataController.SortType.SHUFFLE)
         
     }
     
@@ -62,6 +58,7 @@ class SongTableViewController: UIViewController,UITableViewDelegate,UITableViewD
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        //ここに遷移処理を書く
         let musicPlayerViewController = MusicPlayerViewController()
         musicPlayerViewController.indexId = indexPath.row
         musicPlayerViewController.currentSongList = currentSongList
@@ -72,20 +69,12 @@ class SongTableViewController: UIViewController,UITableViewDelegate,UITableViewD
         
         switch sender.selectedSegmentIndex {
         case 0:
-            // DEFAULT
-            self.currentSongList = musicDataController.getSongsWithPlaylist(id: self.receiveId, sortType: MusicDataController.SortType.DEFAULT)
+            print("")
         case 1:
-            // SHUFFLE
-            self.currentSongList = musicDataController.getSongsWithPlaylist(id: self.receiveId, sortType: MusicDataController.SortType.SHUFFLE)
-        case 2:
-            // TITLE
-            self.currentSongList = musicDataController.getSongsWithPlaylist(id: self.receiveId, sortType: MusicDataController.SortType.TITLE)
-
+            print("")
         default:
             print("")
         }
-        
-        self.tableView.reloadData()
     }
     
 

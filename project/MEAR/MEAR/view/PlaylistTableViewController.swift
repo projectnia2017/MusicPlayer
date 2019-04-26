@@ -23,16 +23,15 @@ class PlaylistTableViewController: UIViewController,UITableViewDelegate,UITableV
 
     // 遷移先のViewControllerに渡す変数
     var giveId:Int = 0
-    var playlistTitle : String = ""
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+
         self.segmentedView.addBorder(toSide: UIView.ViewSide.Bottom, withColor: UIColor.black.cgColor, andThickness: 1)
         
         self.tableView.register(UINib(nibName: "PlaylistTableViewCell", bundle: nil), forCellReuseIdentifier: "PlaylistTableViewCell")
         //プレイリスト一覧を取得
-        playlists = musicDataController.getPlaylists(sortType: MusicDataController.SortType.TITLE, sortOrder: MusicDataController.SortOrder.ASCENDING)
+        playlists = musicDataController.getPlaylists(sortType: MusicDataController.SortType.DEFAULT, sortOrder: MusicDataController.SortOrder.ASCENDING)
 
         // Do any additional setup after loading the view.
     }
@@ -65,8 +64,9 @@ class PlaylistTableViewController: UIViewController,UITableViewDelegate,UITableV
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        // 押されたときのcellのlabelの文字列をViewControllerに渡したいので、一旦、giveDataに入れとく
         giveId = playlists[indexPath.item].id
-        playlistTitle = playlists[indexPath.item].title
+        // Segueを使った画面遷移を行う関数
         performSegue(withIdentifier: "PlaylistToSonglistSegue", sender: nil)
     }
     
@@ -74,15 +74,14 @@ class PlaylistTableViewController: UIViewController,UITableViewDelegate,UITableV
         
         switch sender.selectedSegmentIndex {
         case 0:
-            playlists = musicDataController.getPlaylists(sortType: MusicDataController.SortType.TITLE, sortOrder: MusicDataController.SortOrder.ASCENDING)
+            print("0")
         case 1:
-            playlists = musicDataController.getPlaylists(sortType: MusicDataController.SortType.LASTPLAYINGDATE, sortOrder: MusicDataController.SortOrder.DESCENDING)
+            print("1")
         case 2:
-            playlists = musicDataController.getPlaylists(sortType: MusicDataController.SortType.DATEADDED, sortOrder: MusicDataController.SortOrder.DESCENDING)
+            print("2")
         default:
-            print("default")
+            print("3")
         }
-        self.tableView.reloadData()
     }
     
 
@@ -93,7 +92,6 @@ class PlaylistTableViewController: UIViewController,UITableViewDelegate,UITableV
         if segue.identifier == "PlaylistToSonglistSegue" {
             let vc = segue.destination as! SongTableViewController
             vc.receiveId = giveId
-            vc.playlistTitle = playlistTitle
         }
         
         // Get the new view controller using segue.destinationViewController.

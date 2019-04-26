@@ -22,7 +22,6 @@
                 <outlet property="songLabel" destination="vPQ-ji-OJR" id="Dvh-Hi-3Ty"/>
                 <outlet property="songTimeSlider" destination="2fC-xa-r8q" id="ux5-1I-ff7"/>
                 <outlet property="view" destination="i5M-Pr-FkT" id="sfx-zR-JGt"/>
-                <outlet property="volumeSliderView" destination="deY-L2-olM" id="Ubc-6N-hlK"/>
             </connections>
         </placeholder>
         <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
@@ -40,10 +39,9 @@
                                 <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="40" id="Qdo-hz-66N"/>
                             </constraints>
                         </imageView>
-                        <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="deY-L2-olM">
-                            <rect key="frame" x="54" y="0.0" width="217" height="40"/>
-                            <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                        </view>
+                        <slider opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="0.5" minValue="0.0" maxValue="1" translatesAutoresizingMaskIntoConstraints="NO" id="Vmb-C7-vkq">
+                            <rect key="frame" x="52" y="0.0" width="221" height="41"/>
+                        </slider>
                         <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="icon-volume-up.png" translatesAutoresizingMaskIntoConstraints="NO" id="c2F-lF-j1x">
                             <rect key="frame" x="281" y="0.0" width="44" height="40"/>
                             <constraints>
@@ -102,9 +100,6 @@
                                 <constraint firstAttribute="width" constant="44" id="p9c-Io-Omq"/>
                             </constraints>
                             <state key="normal" title="Button" image="icon-rewind.png"/>
-                            <connections>
-                                <action selector="prevMusic:" destination="-1" eventType="touchUpInside" id="Miq-G8-00L"/>
-                            </connections>
                         </button>
                         <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="0R1-ra-EE4">
                             <rect key="frame" x="74" y="0.0" width="44" height="44"/>
@@ -112,9 +107,6 @@
                                 <constraint firstAttribute="width" constant="44" id="Wsx-Vu-l86"/>
                             </constraints>
                             <state key="normal" title="Button" image="icon-play.png"/>
-                            <connections>
-                                <action selector="stopMusic:" destination="-1" eventType="touchUpInside" id="Zp8-of-crN"/>
-                            </connections>
                         </button>
                         <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="n9g-5w-hFl">
                             <rect key="frame" x="148" y="0.0" width="44" height="44"/>
@@ -122,9 +114,6 @@
                                 <constraint firstAttribute="width" constant="44" id="VQS-EM-BFv"/>
                             </constraints>
                             <state key="normal" title="Button" image="icon-skip.png"/>
-                            <connections>
-                                <action selector="nextMusic:" destination="-1" eventType="touchUpInside" id="oU8-ZE-WnT"/>
-                            </connections>
                         </button>
                     </subviews>
                 </stackView>
@@ -173,7 +162,7 @@
                     </constraints>
                     <state key="normal" title="Button" image="icon-close.png"/>
                     <connections>
-                        <action selector="closeButton:" destination="-1" eventType="touchUpInside" id="Xws-PY-HRM"/>
+                        <action selector="closeView:" destination="-1" eventType="touchUpInside" id="mXm-UP-ts0"/>
                     </connections>
                 </button>
             </subviews>
